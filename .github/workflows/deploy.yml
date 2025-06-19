@@ -43,8 +43,11 @@ jobs:
           docker push ${{ secrets.USERNAME }}/${{ matrix.image_name }}:latest
           docker push ${{ secrets.USERNAME }}/${{ matrix.image_name }}:${{ steps.vars.outputs.sha_short }}
 
-      - name: Display pushed tags
+      - name: Trigger Render deploy via API
+        env:
+          RENDER_SERVICE_ID: srv-d1a0p495pdvs73aaslr0
+          RENDER_API_TOKEN: ${{ secrets.RENDER_API_TOKEN }}
         run: |
-          echo "✅ ${{ matrix.service }} images pushed:"
-          echo "- ${{ secrets.USERNAME }}/${{ matrix.image_name }}:latest"
-          echo "- ${{ secrets.USERNAME }}/${{ matrix.image_name }}:${{ steps.vars.outputs.sha_short }}"
+          curl -X POST "https://api.render.com/deploy/${RENDER_SERVICE_ID}" \
+              -H "Authorization: Bearer ${RENDER_API_TOKEN}" \
+              -H "Accept: application/json"
