@@ -1,4 +1,4 @@
-name: Build and Push Docker Image
+name: Build and Push Docker Images
 
 on:
   push:
@@ -9,6 +9,14 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     environment: githubaction
+    strategy:
+      matrix:
+        service: [back, front]
+        include:
+          - service: back
+            image_name: my-backend
+          - service: front
+            image_name: my-frontend
 
     steps:
       - name: Checkout code
@@ -26,17 +34,17 @@ jobs:
 
       - name: Build and tag Docker image
         run: |
-          cd back
-          docker build -t ${{ secrets.USERNAME }}/my-backend:latest \
-                       -t ${{ secrets.USERNAME }}/my-backend:${{ steps.vars.outputs.sha_short }} .
+          cd ${{ matrix.service }}
+          docker build -t ${{ secrets.USERNAME }}/${{ matrix.image_name }}:latest \
+                       -t ${{ secrets.USERNAME }}/${{ matrix.image_name }}:${{ steps.vars.outputs.sha_short }} .
 
       - name: Push Docker images
         run: |
-          docker push ${{ secrets.USERNAME }}/my-backend:latest
-          docker push ${{ secrets.USERNAME }}/my-backend:${{ steps.vars.outputs.sha_short }}
+          docker push ${{ secrets.USERNAME }}/${{ matrix.image_name }}:latest
+          docker push ${{ secrets.USERNAME }}/${{ matrix.image_name }}:${{ steps.vars.outputs.sha_short }}
 
       - name: Display pushed tags
         run: |
-          echo "Images pushed:"
-          echo "- ${{ secrets.USERNAME }}/my-backend:latest"
-          echo "- ${{ secrets.USERNAME }}/my-backend:${{ steps.vars.outputs.sha_short }}"
+          echo "✅ ${{ matrix.service }} images pushed:"
+          echo "- ${{ secrets.USERNAME }}/${{ matrix.image_name }}:latest"
+          echo "- ${{ secrets.USERNAME }}/${{ matrix.image_name }}:${{ steps.vars.outputs.sha_short }}"
