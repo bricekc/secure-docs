@@ -1,0 +1,53 @@
+name: Build and Push Docker Images
+
+on:
+  push:
+    branches:
+      - feat/github-action
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    environment: githubaction
+    strategy:
+      matrix:
+        service: [back, front]
+        include:
+          - service: back
+            image_name: my-backend
+          - service: front
+            image_name: my-frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get commit hash
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+
+      - name: Build and tag Docker image
+        run: |
+          cd ${{ matrix.service }}
+          docker build -t ${{ secrets.USERNAME }}/${{ matrix.image_name }}:latest \
+                       -t ${{ secrets.USERNAME }}/${{ matrix.image_name }}:${{ steps.vars.outputs.sha_short }} .
+
+      - name: Push Docker images
+        run: |
+          docker push ${{ secrets.USERNAME }}/${{ matrix.image_name }}:latest
+          docker push ${{ secrets.USERNAME }}/${{ matrix.image_name }}:${{ steps.vars.outputs.sha_short }}
+
+      - name: Trigger Render deploy via API
+        env:
+          RENDER_SERVICE_ID: srv-d1a0p495pdvs73aaslr0
+          RENDER_API_TOKEN: ${{ secrets.RENDER_API_TOKEN }}
+        run: |
+          curl -X POST "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys" \
+              -H "Authorization: Bearer ${RENDER_API_TOKEN}" \
+              -H "Accept: application/json"
