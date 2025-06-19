@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: secure-docs
+  back:
+    container_name: secure-docs-back
+    build:
+      context: ./back
+    ports:
+      - "3000:3000"
+    command: npm run start:dev
+    develop:
+      watch:
+        - action: sync
+          path: ./back
+          target: /app
+        - action: rebuild
+          path: package.json
+  front:
+    container_name: secure-docs-front
+    build:
+      context: ./front
+    ports:
+      - "5173:5173"
+    command: npm run dev
+    develop:
+      watch:
+        - action: sync
+          path: ./front
+          target: /app
+        - action: rebuild
+          path: ./front/package.json
+  redis:
+    image: redis:8.0-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:
