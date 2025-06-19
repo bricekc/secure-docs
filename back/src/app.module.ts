@@ -3,6 +3,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 import { PrismaService } from './prisma.service';
+import { AppResolver } from './app.resolver';
 
 @Module({
   imports: [
@@ -16,6 +17,6 @@ import { PrismaService } from './prisma.service';
       buildSchemaOptions: { dateScalarMode: 'timestamp' },
     }),
   ],
-  providers: [PrismaService],
+  providers: [PrismaService, AppResolver],
 })
 export class AppModule {}
