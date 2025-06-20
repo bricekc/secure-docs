@@ -1,5 +1,11 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { Document } from 'src/document/document.model';
+import { ObjectType, Field, Int, registerEnumType } from '@nestjs/graphql';
+
+export enum Role {
+  USER = 'USER',
+  ADMIN = 'ADMIN',
+}
+
+registerEnumType(Role, { name: 'Role' });
 
 @ObjectType()
 export class User {
@@ -9,17 +15,11 @@ export class User {
   @Field()
   email: string;
 
-  @Field({ nullable: true })
-  name?: string;
+  @Field(() => String, { nullable: true })
+  name?: string | null;
+
+  password: string;
 
   @Field(() => Role)
   role: Role;
-
-  @Field(() => [Document])
-  posts: Document[];
-}
-
-enum Role {
-  USER,
-  ADMIN,
 }
