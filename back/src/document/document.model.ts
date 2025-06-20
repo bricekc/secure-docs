@@ -10,8 +10,11 @@ export class Document {
   name: string;
 
   @Field()
+  status: string;
+
+  @Field()
   userId: number;
 
   @Field(() => [User])
-  posts: User[];
+  user: User[];
 }
