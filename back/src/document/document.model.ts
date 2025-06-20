@@ -16,5 +16,5 @@ export class Document {
   userId: number;
 
   @Field(() => [User])
-  posts: User[];
+  user: User[];
 }

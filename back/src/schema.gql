@@ -2,35 +2,46 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type AuthResponse {
+  access_token: String!
+}
+
 type Document {
   id: Int!
   name: String!
-  posts: [User!]!
   status: String!
+  user: [User!]!
   userId: Float!
 }
 
 type Mutation {
-  createDocument(data: String!): Boolean!
+  createUser(input: UserDTO!): User!
+  login(email: String!, password: String!): AuthResponse!
 }
 
 type Query {
-  hello: String!
+  getUserById: User
+  getUsers: [User!]!
   sayHello: String!
 }
 
-"""
-User role (admin or user)
-"""
+"""User role (admin or user)"""
 enum Role {
   ADMIN
   USER
 }
 
 type User {
+  documents: [Document!]
   email: String!
   id: Int!
   name: String
-  posts: [Document!]!
   role: Role!
+}
+
+input UserDTO {
+  email: String!
+  name: String
+  password: String!
+  role: Role! = USER
 }
