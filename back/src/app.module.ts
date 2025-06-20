@@ -21,7 +21,7 @@ import { AuthModule } from './auth/auth.module';
     }),
     PrismaModule,
     UserModule,
-    AuthModule
+    AuthModule,
   ],
   providers: [PrismaService, AppResolver],
 })

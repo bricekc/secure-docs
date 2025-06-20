@@ -25,6 +25,7 @@ model User {
 model Document {
   id     Int    @id @default(autoincrement())
   name   String
+  status String
   user   User?  @relation(fields: [userId], references: [id])
   userId Int?
 }

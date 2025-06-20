@@ -7,6 +7,11 @@ export enum Role {
 
 registerEnumType(Role, { name: 'Role' });
 
+registerEnumType(Role, {
+  name: 'Role',
+  description: 'User role (admin or user)',
+});
+
 @ObjectType()
 export class User {
   @Field(() => Int)
@@ -22,4 +27,7 @@ export class User {
 
   @Field(() => Role)
   role: Role;
+
+  @Field(() => [Document])
+  document: Document[];
 }

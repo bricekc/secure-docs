@@ -2,21 +2,26 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type AuthResponse {
-  access_token: String!
+type Document {
+  id: Int!
+  name: String!
+  posts: [User!]!
+  status: String!
+  userId: Float!
 }
 
 type Mutation {
-  createUser(input: UserDTO!): User!
-  login(email: String!, password: String!): AuthResponse!
+  createDocument(data: String!): Boolean!
 }
 
 type Query {
-  getUserById: User
-  getUsers: [User!]!
+  hello: String!
   sayHello: String!
 }
 
+"""
+User role (admin or user)
+"""
 enum Role {
   ADMIN
   USER
@@ -26,12 +31,6 @@ type User {
   email: String!
   id: Int!
   name: String
+  posts: [Document!]!
   role: Role!
-}
-
-input UserDTO {
-  email: String!
-  name: String
-  password: String!
-  role: Role! = USER
 }
