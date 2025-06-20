@@ -2,6 +2,36 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type AuthResponse {
+  access_token: String!
+}
+
+type Mutation {
+  createUser(input: UserDTO!): User!
+  login(email: String!, password: String!): AuthResponse!
+}
+
 type Query {
+  getUserById: User
+  getUsers: [User!]!
   sayHello: String!
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+type User {
+  email: String!
+  id: Int!
+  name: String
+  role: Role!
+}
+
+input UserDTO {
+  email: String!
+  name: String
+  password: String!
+  role: Role! = USER
 }

@@ -4,6 +4,9 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 import { PrismaService } from './prisma.service';
 import { AppResolver } from './app.resolver';
+import { UserModule } from './user/user.module';
+import { PrismaModule } from './prisma/prisma.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -16,6 +19,9 @@ import { AppResolver } from './app.resolver';
       sortSchema: true,
       buildSchemaOptions: { dateScalarMode: 'timestamp' },
     }),
+    PrismaModule,
+    UserModule,
+    AuthModule
   ],
   providers: [PrismaService, AppResolver],
 })
