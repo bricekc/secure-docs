@@ -3,6 +3,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { DocumentResolver } from './document.resolver';
 import { DocumentService } from './document.service';
 import { PrismaService } from '../prisma.service';
+import { AzureBlobService } from 'src/worker/azure-blob.storage';
 
 @Module({
   imports: [
@@ -10,6 +11,11 @@ import { PrismaService } from '../prisma.service';
       name: 'document-queue',
     }),
   ],
-  providers: [DocumentResolver, DocumentService, PrismaService],
+  providers: [
+    DocumentResolver,
+    DocumentService,
+    PrismaService,
+    AzureBlobService,
+  ],
 })
 export class DocumentModule {}

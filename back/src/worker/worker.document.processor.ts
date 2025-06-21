@@ -2,37 +2,57 @@ import { Processor, WorkerHost, OnWorkerEvent } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
+import { AzureBlobService } from './azure-blob.storage';
+
+interface UploadFileJob {
+  fileName: string;
+  content: string;
+  userId: number;
+}
 
 @Processor('document-queue')
 @Injectable()
 export class DocumentProcessor extends WorkerHost {
-  constructor(private prisma: PrismaService) {
+  constructor(
+    private prisma: PrismaService,
+    private azureBlobService: AzureBlobService,
+  ) {
     super();
   }
 
   async process(job: Job<any, any, string>): Promise<any> {
     switch (job.name) {
       case 'upload-document':
-        return this.handleUploadDocument(job);
+        return this.handleUploadFileToAzure(job);
       default:
         throw new Error(`Unknown job type: ${job.name}`);
     }
   }
 
-  private async handleUploadDocument(job: Job) {
-    console.log('Processing upload document job:', job.data);
+  private async handleUploadFileToAzure(job: Job<UploadFileJob>) {
+    const { fileName, content, userId } = job.data;
 
-    await this.azureUpload(job.data.data);
+    try {
+      console.log(`Starting Azure upload for file: ${fileName}`);
 
-    // const document = await this.prisma.document.create({...});
+      const buffer = Buffer.from(content, 'base64');
 
-    console.log('Document processed successfully!');
-    return { success: true };
-  }
+      const url = await this.azureBlobService.uploadFile(fileName, buffer);
 
-  private async azureUpload(data: string): Promise<void> {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    console.log(`File uploaded to Azure: ${data}`);
+      await this.prisma.document.create({
+        data: {
+          name: fileName.split('/').pop() || fileName,
+          status: 'uploaded',
+          userId: userId,
+        },
+      });
+
+      console.log(`File uploaded successfully to Azure: ${url}`);
+      return { success: true, url };
+    } catch (error) {
+      console.error(`Failed to upload file ${fileName}:`, error);
+      throw error;
+    }
   }
 
   @OnWorkerEvent('completed')

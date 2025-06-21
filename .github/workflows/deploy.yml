@@ -3,7 +3,7 @@ name: Build and Push Docker Images
 on:
   push:
     branches:
-      - feat/github-action
+      - feat/add_azure_blob_storage
 
 jobs:
   build-and-push:
@@ -11,12 +11,20 @@ jobs:
     environment: githubaction
     strategy:
       matrix:
-        service: [back, front]
+        service: [back, front, worker]
         include:
           - service: back
+            build_path: back
             image_name: my-backend
+            dockerfile: Dockerfile
           - service: front
+            build_path: front
             image_name: my-frontend
+            dockerfile: Dockerfile
+          - service: worker
+            image_name: my-worker
+            build_path: back
+            dockerfile: Dockerfile.worker
 
     steps:
       - name: Checkout code
@@ -34,8 +42,8 @@ jobs:
 
       - name: Build and tag Docker image
         run: |
-          cd ${{ matrix.service }}
-          docker build -t ${{ secrets.USERNAME }}/${{ matrix.image_name }}:latest \
+          cd ${{ matrix.build_path }}
+          docker build -f ${{ matrix.dockerfile }} -t ${{ secrets.USERNAME }}/${{ matrix.image_name }}:latest \
                        -t ${{ secrets.USERNAME }}/${{ matrix.image_name }}:${{ steps.vars.outputs.sha_short }} .
 
       - name: Push Docker images
