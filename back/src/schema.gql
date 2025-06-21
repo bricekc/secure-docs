@@ -15,14 +15,18 @@ type Document {
 }
 
 type Mutation {
+  createDocument(data: String!): Boolean!
   createUser(input: UserDTO!): User!
+  deleteFileInFolder(fileName: String!, id: Float!): Boolean!
   login(email: String!, password: String!): AuthResponse!
+  uploadFile(content: String!, fileName: String!): String!
 }
 
 type Query {
   getUserById: User
   getUsers: [User!]!
-  sayHello: String!
+  hello: String!
+  listFilesInFolder: [Document!]!
 }
 
 """User role (admin or user)"""

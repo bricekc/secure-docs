@@ -1,4 +1,4 @@
-import { Resolver, Mutation, Args, Query, Int } from '@nestjs/graphql';
+import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 import { UserService } from './user.service';
 import { UserDTO } from './dto/UserDTO';
 import { Role as GqlRole, User } from './user.model';
@@ -15,7 +15,6 @@ export class UserResolver {
     const user = await this.userService.create(input);
     return {
       ...user,
-      password: user.password,
       role: user.role as GqlRole,
     };
   }
@@ -26,20 +25,20 @@ export class UserResolver {
     const users = await this.userService.findAll();
     return users.map((user) => ({
       ...user,
-      password: user.password,
       role: user.role as GqlRole,
     }));
   }
 
   @Query(() => User, { nullable: true })
   @UseGuards(JwtAuthGuard)
-  async getUserById(@CurrentUser() user: { userId: number }): Promise<User | null> {
+  async getUserById(
+    @CurrentUser() user: { userId: number },
+  ): Promise<User | null> {
     const currentUser = await this.userService.findById(user.userId);
     if (!currentUser) return null;
 
     return {
       ...currentUser,
-      password: currentUser.password,
       role: currentUser.role as GqlRole,
     };
   }

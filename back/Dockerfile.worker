@@ -1,0 +1,15 @@
+FROM node:lts-alpine3.22
+
+WORKDIR /app
+
+RUN npm install -g @nestjs/cli nodemon ts-node
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+EXPOSE 30001
+
+CMD ["sh", "-c", "npx prisma generate && npm run start:worker"]
