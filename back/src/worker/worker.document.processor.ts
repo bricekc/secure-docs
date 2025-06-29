@@ -3,12 +3,7 @@ import { Job } from 'bullmq';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { AzureBlobService } from './azure-blob.storage';
-
-interface UploadFileJob {
-  fileName: string;
-  content: string;
-  userId: number;
-}
+import { UploadFileJob } from '../document/dto/UploadJobData';
 
 @Processor('document-queue')
 @Injectable()
@@ -24,6 +19,8 @@ export class DocumentProcessor extends WorkerHost {
     switch (job.name) {
       case 'upload-document':
         return this.handleUploadFileToAzure(job);
+      case 'update-document':
+        return this.handleUpdateFileInAzure(job);
       default:
         throw new Error(`Unknown job type: ${job.name}`);
     }
@@ -51,6 +48,29 @@ export class DocumentProcessor extends WorkerHost {
       return { success: true, url };
     } catch (error) {
       console.error(`Failed to upload file ${fileName}:`, error);
+      throw error;
+    }
+  }
+
+  private async handleUpdateFileInAzure(job: Job<UploadFileJob>) {
+    const { fileName, content, userId } = job.data;
+
+    try {
+      console.log(`Starting Azure update for file: ${fileName}`);
+
+      const buffer = Buffer.from(content, 'base64');
+
+      const url = await this.azureBlobService.uploadFile(fileName, buffer);
+
+      await this.prisma.document.updateMany({
+        where: { name: fileName.split('/').pop() || fileName, userId: userId },
+        data: { status: 'updated' },
+      });
+
+      console.log(`File updated successfully in Azure: ${url}`);
+      return { success: true, url };
+    } catch (error) {
+      console.error(`Failed to update file ${fileName}:`, error);
       throw error;
     }
   }

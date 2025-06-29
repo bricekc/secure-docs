@@ -5,6 +5,10 @@ import { AzureBlobService } from 'src/worker/azure-blob.storage';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.gard';
 import { CurrentUser } from 'src/auth/current-user.decorator';
+import { CreateDocumentInput } from './dto/CreateDocumentInput';
+import { UploadFileInput } from './dto/UploadFileInput';
+import { DeleteFileInput } from './dto/DeleteFileInput';
+import { UpdateDocumentInput } from './dto/UpdateDocumentInput';
 
 @Resolver(() => Document)
 export class DocumentResolver {
@@ -14,8 +18,29 @@ export class DocumentResolver {
   ) {}
 
   @Mutation(() => Boolean)
-  async createDocument(@Args('data') data: string): Promise<boolean> {
-    return await this.documentService.create(data);
+  @UseGuards(JwtAuthGuard)
+  async createDocument(
+    @Args('input') input: CreateDocumentInput,
+    @CurrentUser() user: { email: string; userId: number },
+  ): Promise<boolean> {
+    return await this.documentService.create(
+      input.name,
+      input.content,
+      user.userId,
+    );
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(JwtAuthGuard)
+  async updateDocument(
+    @Args('input') input: UpdateDocumentInput,
+    @CurrentUser() user: { email: string; userId: number },
+  ): Promise<boolean> {
+    return await this.documentService.updateDocument(
+      input.id,
+      input.newContent,
+      user.userId,
+    );
   }
 
   @Query(() => String)
@@ -26,20 +51,21 @@ export class DocumentResolver {
   @Mutation(() => String)
   @UseGuards(JwtAuthGuard)
   async uploadFile(
-    @Args('fileName') fileName: string,
-    @Args('content') content: string,
+    @Args('input') input: UploadFileInput,
     @CurrentUser()
     user: { email: string; userId: number },
   ): Promise<string> {
-    const base64Content = Buffer.from(content, 'utf-8').toString('base64');
+    const base64Content = Buffer.from(input.content, 'utf-8').toString(
+      'base64',
+    );
 
     await this.documentService.uploadFileToQueue({
-      fileName: `${user.email}/${fileName}`,
+      fileName: `${user.email}/${input.fileName}`,
       content: base64Content,
       userId: user.userId,
     });
 
-    return `File ${fileName} queued for upload`;
+    return `File ${input.fileName} queued for upload`;
   }
 
   @Query(() => [Document])
@@ -57,12 +83,11 @@ export class DocumentResolver {
   @Mutation(() => Boolean)
   @UseGuards(JwtAuthGuard)
   async deleteFileInFolder(
-    @Args('fileName') fileName: string,
-    @Args('id') id: number,
+    @Args('input') input: DeleteFileInput,
     @CurrentUser() user: { email: string; userId: number },
   ): Promise<boolean> {
-    await this.azureBlobService.deleteFile(`${user.email}/${fileName}`);
-    await this.documentService.deleteFile(id, user.userId);
+    await this.azureBlobService.deleteFile(`${user.email}/${input.fileName}`);
+    await this.documentService.deleteFile(input.id, user.userId);
     return true;
   }
 }
