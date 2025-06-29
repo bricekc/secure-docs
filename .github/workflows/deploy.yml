@@ -3,7 +3,7 @@ name: Build and Push Docker Images
 on:
   push:
     branches:
-      - feat/add_azure_blob_storage
+      - main
 
 jobs:
   build-and-push:
@@ -53,9 +53,15 @@ jobs:
 
       - name: Trigger Render deploy via API
         env:
-          RENDER_SERVICE_ID: srv-d1a0p495pdvs73aaslr0
+          RENDER_SERVICE_ID_BACKEND: srv-d1a0p495pdvs73aaslr0
+          RENDER_SERVICE_ID_WORKER: srv-d1bdje2dbo4c73cdv69g
           RENDER_API_TOKEN: ${{ secrets.RENDER_API_TOKEN }}
         run: |
-          curl -X POST "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys" \
+          echo "Triggering backend deploy..."
+          curl -X POST "https://api.render.com/v1/services/${RENDER_SERVICE_ID_BACKEND}/deploys" \
+              -H "Authorization: Bearer ${RENDER_API_TOKEN}" \
+              -H "Accept: application/json"
+          echo "Triggering worker deploy..."
+          curl -X POST "https://api.render.com/v1/services/${RENDER_SERVICE_ID_WORKER}/deploys" \
               -H "Authorization: Bearer ${RENDER_API_TOKEN}" \
               -H "Accept: application/json"

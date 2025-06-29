@@ -6,6 +6,16 @@ type AuthResponse {
   access_token: String!
 }
 
+input CreateDocumentInput {
+  content: String!
+  name: String!
+}
+
+input DeleteFileInput {
+  fileName: String!
+  id: Float!
+}
+
 type Document {
   id: Int!
   name: String!
@@ -14,12 +24,18 @@ type Document {
   userId: Float!
 }
 
+input LoginInput {
+  email: String!
+  password: String!
+}
+
 type Mutation {
-  createDocument(data: String!): Boolean!
+  createDocument(input: CreateDocumentInput!): Boolean!
   createUser(input: UserDTO!): User!
-  deleteFileInFolder(fileName: String!, id: Float!): Boolean!
-  login(email: String!, password: String!): AuthResponse!
-  uploadFile(content: String!, fileName: String!): String!
+  deleteFileInFolder(input: DeleteFileInput!): Boolean!
+  login(input: LoginInput!): AuthResponse!
+  updateDocument(input: UpdateDocumentInput!): Boolean!
+  uploadFile(input: UploadFileInput!): String!
 }
 
 type Query {
@@ -33,6 +49,16 @@ type Query {
 enum Role {
   ADMIN
   USER
+}
+
+input UpdateDocumentInput {
+  id: Int!
+  newContent: String!
+}
+
+input UploadFileInput {
+  content: String!
+  fileName: String!
 }
 
 type User {
