@@ -6,4 +6,7 @@ async function bootstrap() {
   await app.listen(process.env.PORT ?? 30001);
 }
 
-bootstrap();
+bootstrap().catch((err) => {
+  console.error('Failed to start worker application:', err);
+  process.exit(1);
+});

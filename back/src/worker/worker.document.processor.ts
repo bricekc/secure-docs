@@ -15,7 +15,7 @@ export class DocumentProcessor extends WorkerHost {
     super();
   }
 
-  async process(job: Job<any, any, string>): Promise<any> {
+  async process(job: Job<UploadFileJob, any, string>): Promise<any> {
     switch (job.name) {
       case 'upload-document':
         return this.handleUploadFileToAzure(job);
