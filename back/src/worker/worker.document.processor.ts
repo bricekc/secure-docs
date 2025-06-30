@@ -3,7 +3,6 @@ import { Job } from 'bullmq';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { AzureBlobService } from './azure-blob.storage';
-import { UploadFileJob } from '../document/dto/UploadJobData';
 
 @Processor('document-queue')
 @Injectable()
@@ -26,19 +25,27 @@ export class DocumentProcessor extends WorkerHost {
     }
   }
 
-  private async handleUploadFileToAzure(job: Job<UploadFileJob>) {
-    const { fileName, content, userId } = job.data;
+  private async handleUploadFileToAzure(
+    job: Job<{
+      name: string;
+      fileBuffer: { type: 'Buffer'; data: number[] };
+      originalFilename: string;
+      userId: number;
+      userEmail: string;
+    }>,
+  ) {
+    const { name, fileBuffer, originalFilename, userId, userEmail } = job.data;
+    const azureFilename = `${userEmail}/${originalFilename}`;
+
+    const buffer = Buffer.from(fileBuffer.data);
 
     try {
-      console.log(`Starting Azure upload for file: ${fileName}`);
-
-      const buffer = Buffer.from(content, 'base64');
-
-      const url = await this.azureBlobService.uploadFile(fileName, buffer);
+      console.log(`Starting Azure upload for file: ${azureFilename}`);
+      const url = await this.azureBlobService.uploadFile(azureFilename, buffer);
 
       await this.prisma.document.create({
         data: {
-          name: fileName.split('/').pop() || fileName,
+          name,
           status: 'uploaded',
           userId: userId,
         },
@@ -47,30 +54,38 @@ export class DocumentProcessor extends WorkerHost {
       console.log(`File uploaded successfully to Azure: ${url}`);
       return { success: true, url };
     } catch (error) {
-      console.error(`Failed to upload file ${fileName}:`, error);
+      console.error(`Failed to upload file ${azureFilename}:`, error);
       throw error;
     }
   }
 
-  private async handleUpdateFileInAzure(job: Job<UploadFileJob>) {
-    const { fileName, content, userId } = job.data;
+  private async handleUpdateFileInAzure(
+    job: Job<{
+      id: number;
+      fileBuffer: { type: 'Buffer'; data: number[] };
+      originalFilename: string;
+      userEmail: string;
+    }>,
+  ) {
+    const { id, fileBuffer, originalFilename, userEmail } = job.data;
+    const azureFilename = `${userEmail}/${originalFilename}`;
+
+    const buffer = Buffer.from(fileBuffer.data);
 
     try {
-      console.log(`Starting Azure update for file: ${fileName}`);
+      console.log(`Starting Azure update for file: ${azureFilename}`);
 
-      const buffer = Buffer.from(content, 'base64');
+      const url = await this.azureBlobService.uploadFile(azureFilename, buffer);
 
-      const url = await this.azureBlobService.uploadFile(fileName, buffer);
-
-      await this.prisma.document.updateMany({
-        where: { name: fileName.split('/').pop() || fileName, userId: userId },
+      await this.prisma.document.update({
+        where: { id },
         data: { status: 'updated' },
       });
 
       console.log(`File updated successfully in Azure: ${url}`);
       return { success: true, url };
     } catch (error) {
-      console.error(`Failed to update file ${fileName}:`, error);
+      console.error(`Failed to update file ${azureFilename}:`, error);
       throw error;
     }
   }

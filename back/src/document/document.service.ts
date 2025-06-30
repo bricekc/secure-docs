@@ -1,11 +1,15 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { PrismaService } from 'src/prisma.service';
 import { Document } from '@prisma/client';
-import { UploadFileJob } from './dto/UploadJobData';
 import { AzureBlobService } from 'src/worker/azure-blob.storage';
 import { LogProducerService } from 'src/log/log-producer.service';
+import { UploadFileJob } from './dto/UploadJobData';
 
 @Injectable()
 export class DocumentService {
@@ -17,38 +21,42 @@ export class DocumentService {
   ) {}
 
   async create(
-    name: string,
-    content: string,
+    fileBuffer: Buffer,
+    originalFilename: string,
     userId: number,
+    userEmail: string,
   ): Promise<boolean> {
     const existingDocument = await this.prisma.document.findFirst({
-      where: { name, userId },
+      where: { name: originalFilename, userId },
     });
 
     if (existingDocument) {
-      throw new Error(`A document with the name "${name}" already exists.`);
+      throw new Error(
+        `A document with the name "${originalFilename}" already exists.`,
+      );
     }
 
     await this.documentQueue.add('upload-document', {
-      fileName: name,
-      content,
+      fileBuffer,
+      originalFilename,
       userId,
-      timestamp: new Date(),
+      userEmail,
     });
 
     await this.logProducerService.addLog(
       'document',
-      `Document ${name} created by user ${userId}`,
+      `Document ${originalFilename} created by user ${userId}`,
     );
 
-    console.log(`Job added to queue with data: ${name}`);
     return true;
   }
 
   async updateDocument(
     id: number,
-    newContent: string,
+    fileBuffer: Buffer,
+    originalFilename: string,
     userId: number,
+    userEmail: string,
   ): Promise<boolean> {
     const document = await this.prisma.document.findUnique({
       where: { id },
@@ -58,15 +66,11 @@ export class DocumentService {
       throw new UnauthorizedException('Document not found or unauthorized');
     }
 
-    await this.prisma.document.update({
-      where: { id },
-      data: { status: 'updated' },
-    });
-
     await this.documentQueue.add('update-document', {
-      fileName: document.name,
-      content: newContent,
-      userId: userId,
+      id,
+      fileBuffer,
+      originalFilename,
+      userEmail,
     });
 
     await this.logProducerService.addLog(
@@ -78,7 +82,7 @@ export class DocumentService {
     return true;
   }
 
-  async uploadFileToQueue(uploadData: UploadFileJob): Promise<void> {
+  async uploadFileToQueue(uploadData: UploadFileJob): Promise<boolean> {
     const existingDocument = await this.prisma.document.findFirst({
       where: {
         name: uploadData.fileName.split('/').pop(),
@@ -106,6 +110,8 @@ export class DocumentService {
     );
 
     console.log(`File upload job added to queue: ${uploadData.fileName}`);
+
+    return true;
   }
 
   async listFiles(id: number): Promise<Document[]> {
