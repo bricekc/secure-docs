@@ -3,6 +3,7 @@ import { Job } from 'bullmq';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { AzureBlobService } from './azure-blob.storage';
+import { UpdateFileJob, UploadFileJob } from 'src/document/dto/UploadJobData';
 
 @Processor('document-queue')
 @Injectable()
@@ -14,7 +15,7 @@ export class DocumentProcessor extends WorkerHost {
     super();
   }
 
-  async process(job: Job<UploadFileJob, any, string>): Promise<any> {
+  async process(job: Job<any, any, string>): Promise<any> {
     switch (job.name) {
       case 'upload-document':
         return this.handleUploadFileToAzure(job);
@@ -25,15 +26,7 @@ export class DocumentProcessor extends WorkerHost {
     }
   }
 
-  private async handleUploadFileToAzure(
-    job: Job<{
-      name: string;
-      fileBuffer: { type: 'Buffer'; data: number[] };
-      originalFilename: string;
-      userId: number;
-      userEmail: string;
-    }>,
-  ) {
+  private async handleUploadFileToAzure(job: Job<UploadFileJob>) {
     const { name, fileBuffer, originalFilename, userId, userEmail } = job.data;
     const azureFilename = `${userEmail}/${originalFilename}`;
 
@@ -59,14 +52,7 @@ export class DocumentProcessor extends WorkerHost {
     }
   }
 
-  private async handleUpdateFileInAzure(
-    job: Job<{
-      id: number;
-      fileBuffer: { type: 'Buffer'; data: number[] };
-      originalFilename: string;
-      userEmail: string;
-    }>,
-  ) {
+  private async handleUpdateFileInAzure(job: Job<UpdateFileJob>) {
     const { id, fileBuffer, originalFilename, userEmail } = job.data;
     const azureFilename = `${userEmail}/${originalFilename}`;
 

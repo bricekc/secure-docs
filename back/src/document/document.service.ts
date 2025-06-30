@@ -1,15 +1,14 @@
 import {
   Injectable,
-  NotFoundException,
   UnauthorizedException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { PrismaService } from '../prisma.service';
 import { Document } from '@prisma/client';
-import { AzureBlobService } from 'src/worker/azure-blob.storage';
+import { AzureBlobService } from '../worker/azure-blob.storage';
 import { LogProducerService } from 'src/log/log-producer.service';
-import { UploadFileJob } from './dto/UploadJobData';
 
 @Injectable()
 export class DocumentService {
@@ -77,39 +76,6 @@ export class DocumentService {
       'document',
       `Document ${document.name} updated by user ${userId}`,
     );
-
-    console.log(`Update job added to queue for document: ${document.name}`);
-    return true;
-  }
-
-  async uploadFileToQueue(uploadData: UploadFileJob): Promise<boolean> {
-    const existingDocument = await this.prisma.document.findFirst({
-      where: {
-        name: uploadData.fileName.split('/').pop(),
-        userId: uploadData.userId,
-      },
-    });
-
-    if (existingDocument) {
-      throw new Error(
-        `A document with the name "${uploadData.fileName.split('/').pop()}" already exists.`,
-      );
-    }
-
-    await this.documentQueue.add('upload-document', uploadData, {
-      attempts: 3,
-      backoff: {
-        type: 'exponential',
-        delay: 2000,
-      },
-    });
-
-    await this.logProducerService.addLog(
-      'document',
-      `Document ${uploadData.fileName} uploaded by user ${uploadData.userId}`,
-    );
-
-    console.log(`File upload job added to queue: ${uploadData.fileName}`);
 
     return true;
   }
