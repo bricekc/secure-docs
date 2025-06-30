@@ -1,14 +1,11 @@
-import {
-  Injectable,
-  UnauthorizedException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { PrismaService } from 'src/prisma.service';
 import { Document } from '@prisma/client';
 import { UploadFileJob } from './dto/UploadJobData';
 import { AzureBlobService } from 'src/worker/azure-blob.storage';
+import { LogProducerService } from 'src/log/log-producer.service';
 
 @Injectable()
 export class DocumentService {
@@ -16,6 +13,7 @@ export class DocumentService {
     @InjectQueue('document-queue') private documentQueue: Queue,
     private prisma: PrismaService,
     private azureBlobService: AzureBlobService,
+    private logProducerService: LogProducerService,
   ) {}
 
   async create(
@@ -37,6 +35,11 @@ export class DocumentService {
       userId,
       timestamp: new Date(),
     });
+
+    await this.logProducerService.addLog(
+      'document',
+      `Document ${name} created by user ${userId}`,
+    );
 
     console.log(`Job added to queue with data: ${name}`);
     return true;
@@ -66,6 +69,11 @@ export class DocumentService {
       userId: userId,
     });
 
+    await this.logProducerService.addLog(
+      'document',
+      `Document ${document.name} updated by user ${userId}`,
+    );
+
     console.log(`Update job added to queue for document: ${document.name}`);
     return true;
   }
@@ -92,6 +100,11 @@ export class DocumentService {
       },
     });
 
+    await this.logProducerService.addLog(
+      'document',
+      `Document ${uploadData.fileName} uploaded by user ${uploadData.userId}`,
+    );
+
     console.log(`File upload job added to queue: ${uploadData.fileName}`);
   }
 
@@ -114,5 +127,10 @@ export class DocumentService {
     await this.prisma.document.delete({
       where: { id },
     });
+
+    await this.logProducerService.addLog(
+      'document',
+      `Document ${document?.name || 'NO NAME'} deleted by user ${userId}`,
+    );
   }
 }

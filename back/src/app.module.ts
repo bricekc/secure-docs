@@ -8,6 +8,9 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { DocumentModule } from './document/document.module';
 import { BullModule } from '@nestjs/bullmq';
+import { APP_FILTER } from '@nestjs/core';
+import { AllExceptionsFilter } from './log/log.filter';
+import { LogModule } from './log/log.module';
 
 @Module({
   imports: [
@@ -29,7 +32,15 @@ import { BullModule } from '@nestjs/bullmq';
         url: process.env.REDIS_URL,
       },
     }),
+    LogModule,
   ],
-  providers: [PrismaService],
+  providers: [
+    PrismaService,
+    // https://docs.nestjs.com/exception-filters#binding-filters
+    {
+      provide: APP_FILTER,
+      useClass: AllExceptionsFilter,
+    },
+  ],
 })
 export class AppModule {}

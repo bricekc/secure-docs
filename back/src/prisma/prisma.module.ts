@@ -5,6 +5,6 @@ import { PrismaResolver } from './prisma.resolver';
 @Global()
 @Module({
   providers: [PrismaResolver, PrismaService],
-  exports: [PrismaService]
+  exports: [PrismaService],
 })
 export class PrismaModule {}
