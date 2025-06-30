@@ -3,10 +3,11 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 import { PrismaService } from './prisma.service';
-import { AppResolver } from './app.resolver';
 import { UserModule } from './user/user.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
+import { DocumentModule } from './document/document.module';
+import { BullModule } from '@nestjs/bullmq';
 
 @Module({
   imports: [
@@ -21,8 +22,14 @@ import { AuthModule } from './auth/auth.module';
     }),
     PrismaModule,
     UserModule,
-    AuthModule
+    AuthModule,
+    DocumentModule,
+    BullModule.forRoot({
+      connection: {
+        url: process.env.REDIS_URL,
+      },
+    }),
   ],
-  providers: [PrismaService, AppResolver],
+  providers: [PrismaService],
 })
 export class AppModule {}
