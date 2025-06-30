@@ -133,4 +133,53 @@ export class DocumentService {
       `Document ${document?.name || 'NO NAME'} deleted by user ${userId}`,
     );
   }
+
+  async getSecuredFileUrl(id: number, userId: number): Promise<string> {
+    const document = await this.prisma.document.findUnique({
+      where: { id },
+    });
+
+    if (!document) {
+      throw new NotFoundException('Document not found');
+    }
+
+    if (document.userId !== userId) {
+      throw new UnauthorizedException(
+        'You do not have access to this document',
+      );
+    }
+    const user = await this.prisma.user.findFirst({
+      where: { id: userId },
+    });
+
+    const filePath = `${user?.email}/${document.name}`;
+    return this.azureBlobService.getFileSasUrl(filePath);
+  }
+
+  async getDocumentContent(id: number, userId: number): Promise<string> {
+    const document = await this.prisma.document.findUnique({
+      where: { id },
+    });
+
+    if (!document) {
+      throw new NotFoundException('Document not found');
+    }
+
+    if (document.userId !== userId) {
+      throw new UnauthorizedException(
+        'You do not have access to this document',
+      );
+    }
+
+    if (!document.name.endsWith('.txt')) {
+      throw new Error('This endpoint only supports .txt files.');
+    }
+
+    const user = await this.prisma.user.findFirst({
+      where: { id: userId },
+    });
+
+    const filePath = `${user?.email}/${document.name}`;
+    return this.azureBlobService.downloadFileContent(filePath);
+  }
 }

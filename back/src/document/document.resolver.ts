@@ -90,4 +90,22 @@ export class DocumentResolver {
     await this.documentService.deleteFile(input.id, user.userId);
     return true;
   }
+
+  @Query(() => String)
+  @UseGuards(JwtAuthGuard)
+  async getFileUrl(
+    @Args('id') id: number,
+    @CurrentUser() user: { email: string; userId: number },
+  ): Promise<string> {
+    return this.documentService.getSecuredFileUrl(id, user.userId);
+  }
+
+  @Query(() => String)
+  @UseGuards(JwtAuthGuard)
+  async getDocumentContent(
+    @Args('id') id: number,
+    @CurrentUser() user: { email: string; userId: number },
+  ): Promise<string> {
+    return this.documentService.getDocumentContent(id, user.userId);
+  }
 }

@@ -51,6 +51,8 @@ type Mutation {
 }
 
 type Query {
+  getDocumentContent(id: Float!): String!
+  getFileUrl(id: Float!): String!
   getUserById: User
   getUsers: [User!]!
   hello: String!
