@@ -5,10 +5,11 @@ import { AzureBlobService } from 'src/worker/azure-blob.storage';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.gard';
 import { CurrentUser } from 'src/auth/current-user.decorator';
-import { CreateDocumentInput } from './dto/CreateDocumentInput';
-import { UploadFileInput } from './dto/UploadFileInput';
 import { DeleteFileInput } from './dto/DeleteFileInput';
 import { UpdateDocumentInput } from './dto/UpdateDocumentInput';
+import { Stream } from 'stream';
+import GraphQLUpload, { FileUpload } from 'graphql-upload/GraphQLUpload.mjs';
+import { DocumentDTO } from './dto/DocumentDTO';
 
 @Resolver(() => Document)
 export class DocumentResolver {
@@ -17,29 +18,49 @@ export class DocumentResolver {
     private readonly azureBlobService: AzureBlobService,
   ) {}
 
+  private streamToBuffer(stream: Stream): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+      const chunks: Buffer[] = [];
+      stream.on('data', (chunk) => chunks.push(chunk));
+      stream.on('error', reject);
+      stream.on('end', () => resolve(Buffer.concat(chunks)));
+    });
+  }
+
   @Mutation(() => Boolean)
   @UseGuards(JwtAuthGuard)
   async createDocument(
-    @Args('input') input: CreateDocumentInput,
+    @Args({ name: 'file', type: () => GraphQLUpload })
+    { createReadStream, filename }: FileUpload,
     @CurrentUser() user: { email: string; userId: number },
   ): Promise<boolean> {
-    return await this.documentService.create(
-      input.name,
-      input.content,
+    const stream = createReadStream();
+    const buffer = await this.streamToBuffer(stream);
+
+    return this.documentService.create(
+      buffer,
+      filename,
       user.userId,
+      user.email,
     );
   }
 
   @Mutation(() => Boolean)
   @UseGuards(JwtAuthGuard)
   async updateDocument(
-    @Args('input') input: UpdateDocumentInput,
+    @Args('input') { id, file }: UpdateDocumentInput,
     @CurrentUser() user: { email: string; userId: number },
   ): Promise<boolean> {
+    const { createReadStream, filename } = await file;
+    const stream = createReadStream();
+    const buffer = await this.streamToBuffer(stream);
+
     return await this.documentService.updateDocument(
-      input.id,
-      input.newContent,
+      id,
+      buffer,
+      filename,
       user.userId,
+      user.email,
     );
   }
 
@@ -48,36 +69,13 @@ export class DocumentResolver {
     return 'Hello from DocumentResolver!';
   }
 
-  @Mutation(() => String)
-  @UseGuards(JwtAuthGuard)
-  async uploadFile(
-    @Args('input') input: UploadFileInput,
-    @CurrentUser()
-    user: { email: string; userId: number },
-  ): Promise<string> {
-    const base64Content = Buffer.from(input.content, 'utf-8').toString(
-      'base64',
-    );
-
-    await this.documentService.uploadFileToQueue({
-      fileName: `${user.email}/${input.fileName}`,
-      content: base64Content,
-      userId: user.userId,
-    });
-
-    return `File ${input.fileName} queued for upload`;
-  }
-
   @Query(() => [Document])
   @UseGuards(JwtAuthGuard)
   async listFilesInFolder(
     @CurrentUser() user: { email: string; userId: number },
-  ): Promise<Document[]> {
+  ): Promise<DocumentDTO[]> {
     const files = await this.documentService.listFiles(user.userId);
-    return files.map((file) => ({
-      ...file,
-      user: [],
-    }));
+    return files;
   }
 
   @Mutation(() => Boolean)
@@ -89,5 +87,23 @@ export class DocumentResolver {
     await this.azureBlobService.deleteFile(`${user.email}/${input.fileName}`);
     await this.documentService.deleteFile(input.id, user.userId);
     return true;
+  }
+
+  @Query(() => String)
+  @UseGuards(JwtAuthGuard)
+  async getFileUrl(
+    @Args('id') id: number,
+    @CurrentUser() user: { email: string; userId: number },
+  ): Promise<string> {
+    return this.documentService.getSecuredFileUrl(id, user.userId);
+  }
+
+  @Query(() => String)
+  @UseGuards(JwtAuthGuard)
+  async getDocumentContent(
+    @Args('id') id: number,
+    @CurrentUser() user: { email: string; userId: number },
+  ): Promise<string> {
+    return this.documentService.getDocumentContent(id, user.userId);
   }
 }

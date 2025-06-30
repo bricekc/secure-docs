@@ -6,11 +6,6 @@ type AuthResponse {
   access_token: String!
 }
 
-input CreateDocumentInput {
-  content: String!
-  name: String!
-}
-
 input DeleteFileInput {
   fileName: String!
   id: Float!
@@ -41,16 +36,17 @@ input LoginInput {
 }
 
 type Mutation {
-  createDocument(input: CreateDocumentInput!): Boolean!
+  createDocument(file: Upload!): Boolean!
   createUser(input: UserDTO!): User!
   deleteFileInFolder(input: DeleteFileInput!): Boolean!
   login(input: LoginInput!): AuthResponse!
   logs(input: GetLogsInput!): [Log!]!
   updateDocument(input: UpdateDocumentInput!): Boolean!
-  uploadFile(input: UploadFileInput!): String!
 }
 
 type Query {
+  getDocumentContent(id: Float!): String!
+  getFileUrl(id: Float!): String!
   getUserById: User
   getUsers: [User!]!
   hello: String!
@@ -69,14 +65,12 @@ enum Role {
 scalar Timestamp
 
 input UpdateDocumentInput {
+  file: Upload!
   id: Int!
-  newContent: String!
 }
 
-input UploadFileInput {
-  content: String!
-  fileName: String!
-}
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
 
 type User {
   documents: [Document!]

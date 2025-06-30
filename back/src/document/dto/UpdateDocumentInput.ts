@@ -1,10 +1,11 @@
-import { InputType, Field, Int } from '@nestjs/graphql';
+import { Field, InputType, Int } from '@nestjs/graphql';
+import GraphQLUpload, { FileUpload } from 'graphql-upload/GraphQLUpload.mjs';
 
 @InputType()
 export class UpdateDocumentInput {
   @Field(() => Int)
   id: number;
 
-  @Field()
-  newContent: string;
+  @Field(() => GraphQLUpload)
+  file: Promise<FileUpload>;
 }

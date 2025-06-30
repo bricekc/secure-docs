@@ -1,10 +1,11 @@
-import { InputType, Field } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
+import GraphQLUpload, { FileUpload } from 'graphql-upload/GraphQLUpload.mjs';
 
 @InputType()
 export class CreateDocumentInput {
   @Field()
   name: string;
 
-  @Field()
-  content: string;
+  @Field(() => GraphQLUpload)
+  file: Promise<FileUpload>;
 }
