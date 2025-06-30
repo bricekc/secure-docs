@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-import { PrismaService } from 'src/prisma.service';
+import { PrismaService } from '../prisma.service';
 import { Document } from '@prisma/client';
 import { AzureBlobService } from 'src/worker/azure-blob.storage';
 import { LogProducerService } from 'src/log/log-producer.service';
