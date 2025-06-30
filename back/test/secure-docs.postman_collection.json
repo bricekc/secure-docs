@@ -107,9 +107,9 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  login(email: \"{{email}}\", password: \"motdepasse\") {\n    access_token\n  }\n}\n",
-						"variables": ""
-					}
+                        "query": "mutation {\n  login(input: {email: \"{{email}}\", password: \"motdepasse\"}) {\n    access_token\n  }\n}\n",
+                        "variables": ""
+                    }
 				},
 				"url": {
 					"raw": "http://localhost:3000/graphql",

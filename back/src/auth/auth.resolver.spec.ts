@@ -33,7 +33,7 @@ describe('AuthResolver', () => {
 
       authService.login.mockResolvedValue(mockToken);
 
-      const result = await resolver.login(email, password);
+      const result = await resolver.login({ email, password });
 
       expect(authService.login).toHaveBeenCalledWith(email, password);
       expect(result).toEqual(mockToken);

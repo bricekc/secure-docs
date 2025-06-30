@@ -4,10 +4,12 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { UserDTO } from './dto/UserDTO';
 import * as bcrypt from 'bcrypt';
 import { Role } from './user.model';
+import { LogProducerService } from 'src/log/log-producer.service';
 
 describe('UserService', () => {
   let service: UserService;
   let prisma: { user: any };
+  let logProducerService: { addLog: jest.Mock };
 
   beforeEach(async () => {
     prisma = {
@@ -18,10 +20,15 @@ describe('UserService', () => {
       },
     };
 
+    logProducerService = {
+      addLog: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UserService,
         { provide: PrismaService, useValue: prisma },
+        { provide: LogProducerService, useValue: logProducerService },
       ],
     }).compile();
 
