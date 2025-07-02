@@ -27,7 +27,15 @@ describe('AuthResolver', () => {
 
   describe('login', () => {
     it('should return an access token', async () => {
-      const mockToken = { access_token: 'jwt.token.here' };
+      const mockToken = {
+        access_token: 'jwt.token.here',
+        user: {
+          id: 1,
+          email: 'test@example.com',
+          name: 'Test User',
+          role: 'USER',
+        },
+      };
       const email = 'test@example.com';
       const password = 'securePassword123';
 

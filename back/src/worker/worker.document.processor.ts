@@ -27,7 +27,7 @@ export class DocumentProcessor extends WorkerHost {
   }
 
   private async handleUploadFileToAzure(job: Job<UploadFileJob>) {
-    const { name, fileBuffer, originalFilename, userId, userEmail } = job.data;
+    const { fileBuffer, originalFilename, userId, userEmail } = job.data;
     const azureFilename = `${userEmail}/${originalFilename}`;
 
     const buffer = Buffer.from(fileBuffer.data);
@@ -38,7 +38,7 @@ export class DocumentProcessor extends WorkerHost {
 
       await this.prisma.document.create({
         data: {
-          name,
+          name: originalFilename,
           status: 'uploaded',
           userId: userId,
         },

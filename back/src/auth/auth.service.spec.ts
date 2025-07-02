@@ -69,13 +69,23 @@ describe('AuthService', () => {
         email: user.email,
         role: user.role,
       });
-      expect(result).toEqual({ access_token: 'mocked.jwt.token' });
+      expect(result).toEqual({
+        access_token: 'mocked.jwt.token',
+        user: {
+          id: user.id,
+          email: user.email,
+          name: undefined,
+          role: user.role,
+        },
+      });
     });
 
     it('should throw if user does not exist', async () => {
       prisma.user.findUnique.mockResolvedValue(null);
 
-      await expect(service.login(email, password)).rejects.toThrow(UnauthorizedException);
+      await expect(service.login(email, password)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should throw if password is invalid', async () => {
@@ -90,7 +100,9 @@ describe('AuthService', () => {
 
       jest.spyOn(bcrypt, 'compare').mockImplementation(async () => false);
 
-      await expect(service.login(email, password)).rejects.toThrow(UnauthorizedException);
+      await expect(service.login(email, password)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 });
