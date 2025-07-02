@@ -13,4 +13,12 @@ export class DocumentDTO {
 
   @Field(() => Int)
   userId: number;
+
+  @Field()
+  user: {
+    name: string;
+  };
+
+  @Field()
+  types: string;
 }

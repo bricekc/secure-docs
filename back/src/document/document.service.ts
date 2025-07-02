@@ -6,7 +6,6 @@ import {
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { PrismaService } from '../prisma.service';
-import { Document } from '@prisma/client';
 import { AzureBlobService } from '../worker/azure-blob.storage';
 import { LogProducerService } from '../log/log-producer.service';
 
@@ -80,10 +79,26 @@ export class DocumentService {
     return true;
   }
 
-  async listFiles(id: number): Promise<Document[]> {
-    return await this.prisma.document.findMany({
+  async listFiles(id: number): Promise<any[]> {
+    const files = await this.prisma.document.findMany({
       where: { userId: id },
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
     });
+
+    files.map((file) => {
+      file['url'] = this.azureBlobService.getFileSasUrl(
+        `${file.user.email}/${file.name}`,
+      );
+      file['types'] = file.name.split('.').pop();
+    });
+    return files;
   }
 
   async deleteFile(id: number, userId: number): Promise<void> {

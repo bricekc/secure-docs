@@ -9,7 +9,6 @@ import { DeleteFileInput } from './dto/DeleteFileInput';
 import { UpdateDocumentInput } from './dto/UpdateDocumentInput';
 import { Stream } from 'stream';
 import GraphQLUpload, { FileUpload } from 'graphql-upload/GraphQLUpload.mjs';
-import { DocumentDTO } from './dto/DocumentDTO';
 
 @Resolver(() => Document)
 export class DocumentResolver {
@@ -73,7 +72,7 @@ export class DocumentResolver {
   @UseGuards(JwtAuthGuard)
   async listFilesInFolder(
     @CurrentUser() user: { email: string; userId: number },
-  ): Promise<DocumentDTO[]> {
+  ): Promise<any[]> {
     const files = await this.documentService.listFiles(user.userId);
     return files;
   }

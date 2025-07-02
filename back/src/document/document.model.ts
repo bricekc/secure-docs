@@ -15,6 +15,12 @@ export class Document {
   @Field()
   userId: number;
 
-  @Field(() => [User])
-  user: User[];
+  @Field(() => User)
+  user: User;
+
+  @Field({ nullable: true })
+  url: string;
+
+  @Field()
+  types: string;
 }

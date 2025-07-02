@@ -22,7 +22,9 @@ type Document {
   id: Int!
   name: String!
   status: String!
-  user: [User!]!
+  types: String!
+  url: String
+  user: User!
   userId: Float!
 }
 

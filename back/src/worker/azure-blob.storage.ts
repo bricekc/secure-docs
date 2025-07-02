@@ -43,7 +43,7 @@ export class AzureBlobService {
 
     const sasOptions = {
       startsOn: new Date(),
-      expiresOn: new Date(new Date().valueOf() + 3600 * 1000),
+      expiresOn: new Date(new Date().valueOf() + 3600 * 24000),
       permissions: BlobSASPermissions.parse('r'),
     };
 
