@@ -22,6 +22,7 @@ import { LogModule } from './log/log.module';
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       sortSchema: true,
       buildSchemaOptions: { dateScalarMode: 'timestamp' },
+      csrfPrevention: false,
     }),
     PrismaModule,
     UserModule,

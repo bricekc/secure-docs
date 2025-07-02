@@ -19,7 +19,7 @@ import { documentService } from "../services/api";
 interface Document {
   id: number;
   name: string;
-  type: string;
+  types: string;
   url: string;
 }
 
@@ -84,7 +84,7 @@ export default function DashboardHome() {
       .includes(searchTerm.toLowerCase());
     const matchesFilter =
       filterType === "all" ||
-      doc.type.toLowerCase() === filterType.toLowerCase();
+      doc.types.toLowerCase() === filterType.toLowerCase();
     return matchesSearch && matchesFilter;
   });
 
@@ -172,8 +172,8 @@ export default function DashboardHome() {
     }
   };
 
-  const getTypeIcon = (type: string) => {
-    switch (type.toLowerCase()) {
+  const getTypeIcon = (types: string) => {
+    switch (types.toLowerCase()) {
       case "url":
         return Link;
       case "mp4":
@@ -254,7 +254,7 @@ export default function DashboardHome() {
       {/* Documents Grid */}
       <div className="documents-grid">
         {filteredDocuments.map((doc) => {
-          const TypeIcon = getTypeIcon(doc.type);
+          const TypeIcon = getTypeIcon(doc.types);
           return (
             <div key={doc.id} className="document-card">
               <div className="document-header">
@@ -396,7 +396,7 @@ export default function DashboardHome() {
                       <strong>Titre:</strong> {selectedDoc.name}
                     </div>
                     <div className="detail-row">
-                      <strong>Type:</strong> {selectedDoc.type}
+                      <strong>Type:</strong> {selectedDoc.types}
                     </div>
                     {selectedDoc.url && (
                       <div className="detail-row">
@@ -415,7 +415,7 @@ export default function DashboardHome() {
 
                   {/* Visualiseur de fichier */}
                   {selectedDoc.url &&
-                    selectedDoc.type.toLowerCase() === "pdf" && (
+                    selectedDoc.types.toLowerCase() === "pdf" && (
                       <div className="pdf-viewer">
                         <iframe
                           src={selectedDoc.url}
@@ -429,19 +429,19 @@ export default function DashboardHome() {
                     )}
 
                   {selectedDoc.url &&
-                    (selectedDoc.type.toLowerCase() === "docx" ||
-                      selectedDoc.type.toLowerCase() === "xlsx" ||
-                      selectedDoc.type.toLowerCase() === "pptx") && (
+                    (selectedDoc.types.toLowerCase() === "docx" ||
+                      selectedDoc.types.toLowerCase() === "xlsx" ||
+                      selectedDoc.types.toLowerCase() === "pptx") && (
                       <div className="office-viewer">
                         <h4 className="viewer-title">
-                          Document {selectedDoc.type}
+                          Document {selectedDoc.types}
                         </h4>
                         <div className="office-preview bg-gray-100 p-8 rounded border text-center">
                           <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                           <p className="text-gray-600 mb-4">
                             <strong>Fichier Microsoft Office détecté</strong>
                             <br />
-                            Les fichiers {selectedDoc.type} ne peuvent pas être
+                            Les fichiers {selectedDoc.types} ne peuvent pas être
                             prévisualisés dans le navigateur.
                           </p>
                           <div className="bg-blue-50 p-4 rounded border">
@@ -457,7 +457,7 @@ export default function DashboardHome() {
                       </div>
                     )}
 
-                  {selectedDoc.type.toLowerCase() === "mp4" && (
+                  {selectedDoc.types.toLowerCase() === "mp4" && (
                     <div className="video-viewer">
                       <video
                         src={selectedDoc.url}
@@ -468,7 +468,7 @@ export default function DashboardHome() {
                       />
                     </div>
                   )}
-                  {selectedDoc.type.toLowerCase() === "mp3" && (
+                  {selectedDoc.types.toLowerCase() === "mp3" && (
                     <div className="audio-viewer">
                       <audio
                         src={selectedDoc.url}
@@ -477,8 +477,8 @@ export default function DashboardHome() {
                       />
                     </div>
                   )}
-                  {(selectedDoc.type.toLowerCase() === "jpg" ||
-                    selectedDoc.type.toLowerCase() === "png") && (
+                  {(selectedDoc.types.toLowerCase() === "jpg" ||
+                    selectedDoc.types.toLowerCase() === "png") && (
                     <div className="image-viewer">
                       <img
                         src={selectedDoc.url || "/placeholder.svg"}

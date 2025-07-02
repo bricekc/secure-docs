@@ -18,15 +18,10 @@ export class AzureBlobService {
       this.blobServiceClient.getContainerClient(containerName);
   }
 
-  async uploadFile(
-    fileName: string,
-    data: Buffer | Uint8Array | Blob | string,
-  ): Promise<string> {
+  async uploadFile(fileName: string, data: Buffer): Promise<string> {
     const blockBlobClient = this.containerClient.getBlockBlobClient(fileName);
 
-    const uploadData = typeof data === 'string' ? Buffer.from(data) : data;
-
-    await blockBlobClient.uploadData(uploadData, {
+    await blockBlobClient.uploadData(data, {
       blobHTTPHeaders: { blobContentType: 'application/octet-stream' },
     });
 

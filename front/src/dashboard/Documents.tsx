@@ -9,7 +9,7 @@ interface Document {
   name: string;
   status: string;
   url: string;
-  type: string;
+  types: string;
   user: { name: string };
 }
 
@@ -50,7 +50,7 @@ export default function DocumentsPage() {
           ? {
               ...doc,
               title: documentName,
-              url: doc.type.toLowerCase() === "url" ? editUrl : doc.url,
+              url: doc.types.toLowerCase() === "url" ? editUrl : doc.url,
               lastModified: "À l'instant",
             }
           : doc
@@ -63,7 +63,7 @@ export default function DocumentsPage() {
         ...selectedDoc,
         name: documentName,
         url:
-          selectedDoc.type.toLowerCase() === "url" ? editUrl : selectedDoc.url,
+          selectedDoc.types.toLowerCase() === "url" ? editUrl : selectedDoc.url,
       });
     }
 
@@ -100,7 +100,7 @@ export default function DocumentsPage() {
           status: "status",
           user: { name: "user name" },
           url: "https://images-ext-1.discordapp.net/external/WeCIZx0ativLTw5rRdanuTwUzyHsG9bAKRK0y0MMNTw/%3Fsv%3D2025-05-05%26st%3D2025-07-02T11%253A52%253A39Z%26se%3D2025-07-03T11%253A52%253A39Z%26sr%3Db%26sp%3Dr%26sig%3Dt6XFJMx9YzwZC6p7EMwtg%252F6I3r98GQceb%252FdsX%252F%252BphKc%253D/https/securedocsm1.blob.core.windows.net/uploadfile/exemple%2540domaine.com/Capture%2520d%25E2%2580%2599e%25CC%2581cran%25202025-05-23%2520a%25CC%2580%252011.45.57.png?format=webp&quality=lossless&width=834&height=878",
-          type: "png",
+          types: "png",
         },
       ];
 
@@ -117,7 +117,7 @@ export default function DocumentsPage() {
       return nameLower.includes(searchTermLower);
     })
     .filter(
-      (doc) => filterType === "all" || doc.type.toLowerCase() === filterType
+      (doc) => filterType === "all" || doc.types.toLowerCase() === filterType
     );
 
   return (
@@ -155,8 +155,8 @@ export default function DocumentsPage() {
         {filteredDocuments.map((doc) => (
           <div key={doc.id} className="bg-white shadow rounded-lg p-4">
             <h2 className="text-xl font-semibold mb-2">{doc.name}</h2>
-            <p className="text-gray-600">Type: {doc.type}</p>
-            {doc.type.toLowerCase() === "url" && (
+            <p className="text-gray-600">Type: {doc.types}</p>
+            {doc.types.toLowerCase() === "url" && (
               <p className="text-blue-600 text-sm truncate">URL: {doc.url}</p>
             )}
             <div className="mt-4 flex justify-end">
@@ -220,7 +220,7 @@ export default function DocumentsPage() {
                         className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
-                    {selectedDoc.type.toLowerCase() === "url" && (
+                    {selectedDoc.types.toLowerCase() === "url" && (
                       <div>
                         <label className="block text-sm font-medium text-gray-700">
                           URL

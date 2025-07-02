@@ -35,6 +35,7 @@ export const GET_DOCUMENTS = gql`
       user {
         name
       }
+      types
     }
   }
 `;
