@@ -3,9 +3,9 @@ import { UserService } from './user.service';
 import { CreateUserInput } from './dto/CreateUserInput';
 import { Role as GqlRole } from './user.model';
 import { UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.gard';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { UserDTO } from './dto/UserDTO';
+import { AdminGuard } from 'src/auth/admin.guard';
 
 @Resolver(() => UserDTO)
 export class UserResolver {
@@ -23,7 +23,7 @@ export class UserResolver {
   }
 
   @Query(() => [UserDTO])
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AdminGuard)
   async getUsers(): Promise<UserDTO[]> {
     const users = await this.userService.findAll();
     return users.map((user) => ({
@@ -35,7 +35,7 @@ export class UserResolver {
   }
 
   @Query(() => UserDTO, { nullable: true })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(AdminGuard)
   async getUserById(
     @CurrentUser() user: { userId: number },
   ): Promise<UserDTO | null> {

@@ -6,6 +6,8 @@ import { AuthService } from './auth.service';
 import { AuthResolver } from './auth.resolver';
 import { LogModule } from 'src/log/log.module';
 
+import { AdminGuard } from './admin.guard';
+
 @Module({
   imports: [
     JwtModule.register({
@@ -15,6 +17,7 @@ import { LogModule } from 'src/log/log.module';
     PrismaModule,
     LogModule,
   ],
-  providers: [AuthService, AuthResolver, JwtStrategy],
+  providers: [AuthService, AuthResolver, JwtStrategy, AdminGuard],
+  exports: [AdminGuard],
 })
 export class AuthModule {}

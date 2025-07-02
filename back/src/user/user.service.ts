@@ -12,18 +12,25 @@ export class UserService {
   ) {}
 
   async create(data: CreateUserInput) {
-    const hashedPassword = await bcrypt.hash(data.password, 10);
+    try {
+      const hashedPassword = await bcrypt.hash(data.password, 10);
 
-    const user = await this.prisma.user.create({
-      data: {
-        ...data,
-        password: hashedPassword,
-      },
-    });
+      const user = await this.prisma.user.create({
+        data: {
+          ...data,
+          password: hashedPassword,
+        },
+      });
 
-    await this.logProducerService.addLog('user', `User ${user.email} created`);
+      await this.logProducerService.addLog(
+        'user',
+        `User ${user.email} created`,
+      );
 
-    return user;
+      return user;
+    } catch {
+      throw new Error('User creation failed');
+    }
   }
 
   findById(id: number) {
