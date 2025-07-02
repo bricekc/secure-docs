@@ -45,3 +45,9 @@ export const CREATE_DOCUMENTS = gql`
     createDocument(file: $file)
   }
 `;
+
+export const DELETE_FILE_IN_FOLDER = gql`
+  mutation deleteFileInFolder($input: DeleteFileInput!) {
+    deleteFileInFolder(input: $input)
+  }
+`;

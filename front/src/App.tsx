@@ -7,7 +7,6 @@ import {
 import LoginPage from "./pages/Login";
 import DashboardLayout from "./dashboard/Layout";
 import DashboardHome from "./dashboard/Home";
-import DashboardDocuments from "./dashboard/Documents";
 
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import "./App.css";
@@ -27,7 +26,6 @@ function App() {
           }
         >
           <Route index element={<DashboardHome />} />
-          <Route path="documents" element={<DashboardDocuments />} />
         </Route>
       </Routes>
     </Router>

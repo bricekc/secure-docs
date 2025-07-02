@@ -161,7 +161,13 @@ describe('DocumentService', () => {
   describe('listFiles', () => {
     it('should return a list of documents for a user', async () => {
       const documents = [
-        { id: 1, name: 'test.txt', userId: 1, status: 'processed' },
+        {
+          id: 1,
+          name: 'test.txt',
+          userId: 1,
+          status: 'processed',
+          user: { email: 'test@example.com' },
+        },
       ];
       prisma.document.findMany.mockResolvedValue(documents);
 
@@ -169,6 +175,14 @@ describe('DocumentService', () => {
 
       expect(prisma.document.findMany).toHaveBeenCalledWith({
         where: { userId: 1 },
+        include: {
+          user: {
+            select: {
+              name: true,
+              email: true,
+            },
+          },
+        },
       });
       expect(result).toEqual(documents);
     });

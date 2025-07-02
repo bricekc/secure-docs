@@ -111,14 +111,16 @@ export default function DashboardHome() {
     setName("");
   };
 
-  const handleDelete = (id: number) => {
-    if (window.confirm("Êtes-vous sûr de vouloir supprimer ce document ?")) {
-      setDocuments((docs) => docs.filter((doc) => doc.id !== id));
-      if (selectedDoc && selectedDoc.id === id) {
-        setShowModal(false);
-        setSelectedDoc(null);
+  const handleDelete = async (id: number) => {
+      const response = await documentService.deleteDocument(selectedDoc?.name || "",  id);
+      if (response) {
+        setDocuments((docs) => docs.filter((doc) => doc.id !== id));
+        if (selectedDoc && selectedDoc.id === id) {
+          setShowModal(false);
+          setSelectedDoc(null);
+        }
       }
-    }
+    
   };
 
   const handleView = (doc: Document) => {

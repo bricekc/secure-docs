@@ -3,14 +3,13 @@ import { apolloClient } from "./apollo-client";
 import {
   CREATE_DOCUMENTS,
   CREATE_USER,
+  DELETE_FILE_IN_FOLDER,
   GET_DOCUMENTS,
   LOGIN,
 } from "./gql-requests";
 
-// Configuration de base pour les appels API
 const API_BASE_URL = import.meta.env.VITE_BACK_URL;
 
-// Fonction utilitaire pour les appels API avec gestion du token
 async function apiCall(endpoint: string, options: RequestInit = {}) {
   // A SUPPRIMER
   const token = localStorage.getItem("token");
@@ -145,12 +144,15 @@ export const documentService = {
     return response.json();
   },
 
-  // 👈 CONNECTER À VOTRE ENDPOINT DELETE /documents/:id
-  async deleteDocument(id: string) {
-    return apiCall(`/documents/${id}`, {
-      method: "DELETE",
+  async deleteDocument(fileName: string, id: number) {
+    const response = await apolloClient.mutate({
+      mutation: DELETE_FILE_IN_FOLDER,
+      variables: {
+        input: { fileName, id },
+      },
     });
-    // Réponse attendue: { success: boolean }
+
+    return response.data.deleteFileInFolder;
   },
 
   // 👈 CONNECTER À VOTRE ENDPOINT GET /documents/shared
