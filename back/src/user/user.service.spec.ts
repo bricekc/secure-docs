@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { UserDTO } from './dto/UserDTO';
 import * as bcrypt from 'bcrypt';
 import { Role } from './user.model';
 import { LogProducerService } from 'src/log/log-producer.service';
+import { CreateUserInput } from './dto/CreateUserInput';
 
 describe('UserService', () => {
   let service: UserService;
@@ -41,10 +41,9 @@ describe('UserService', () => {
 
   describe('create', () => {
     it('should hash password and create a user', async () => {
-      const dto: UserDTO = {
+      const dto: CreateUserInput = {
         email: 'test@example.com',
         password: 'password',
-        role: Role.USER,
       };
 
       const hashedPassword = await bcrypt.hash(dto.password, 10);
@@ -53,7 +52,6 @@ describe('UserService', () => {
         id: 1,
         email: dto.email,
         password: hashedPassword,
-        role: dto.role,
       };
 
       prisma.user.create.mockResolvedValue(createdUser);
