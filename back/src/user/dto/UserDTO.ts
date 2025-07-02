@@ -1,17 +1,17 @@
-import { InputType, Field } from '@nestjs/graphql';
+import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { Role } from '../user.model';
 
-@InputType()
+@ObjectType()
 export class UserDTO {
+  @Field(() => Int)
+  id: number;
+
   @Field()
   email: string;
 
-  @Field({ nullable: true })
-  name?: string;
+  @Field(() => String, { nullable: true })
+  name?: string | null;
 
-  @Field()
-  password: string;
-
-  @Field(() => Role, { defaultValue: Role.USER })
-  role?: Role;
+  @Field(() => Role)
+  role: Role;
 }

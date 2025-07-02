@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma.service';
 import { AzureBlobService } from '../worker/azure-blob.storage';
 import { getQueueToken } from '@nestjs/bullmq';
 import { UnauthorizedException, NotFoundException } from '@nestjs/common';
+import { LogProducerService } from 'src/log/log-producer.service';
 
 const mockPrismaService = {
   document: {
@@ -31,6 +32,7 @@ describe('DocumentService', () => {
   let prisma: typeof mockPrismaService;
   let azureBlob: typeof mockAzureBlobService;
   let queue: typeof mockDocumentQueue;
+  let logProducerService: { addLog: jest.Mock };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -42,6 +44,7 @@ describe('DocumentService', () => {
           provide: getQueueToken('document-queue'),
           useValue: mockDocumentQueue,
         },
+        { provide: LogProducerService, useValue: { addLog: jest.fn() } },
       ],
     }).compile();
 

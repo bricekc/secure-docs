@@ -1,44 +1,51 @@
 import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 import { UserService } from './user.service';
-import { UserDTO } from './dto/UserDTO';
-import { Role as GqlRole, User } from './user.model';
+import { CreateUserInput } from './dto/CreateUserInput';
+import { Role as GqlRole } from './user.model';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.gard';
 import { CurrentUser } from 'src/auth/current-user.decorator';
+import { UserDTO } from './dto/UserDTO';
 
-@Resolver(() => User)
+@Resolver(() => UserDTO)
 export class UserResolver {
   constructor(private userService: UserService) {}
 
-  @Mutation(() => User)
-  async createUser(@Args('input') input: UserDTO): Promise<User> {
+  @Mutation(() => UserDTO)
+  async createUser(@Args('input') input: CreateUserInput): Promise<UserDTO> {
     const user = await this.userService.create(input);
     return {
-      ...user,
+      id: user.id,
+      email: user.email,
+      name: user.name,
       role: user.role as GqlRole,
     };
   }
 
-  @Query(() => [User])
+  @Query(() => [UserDTO])
   @UseGuards(JwtAuthGuard)
-  async getUsers(): Promise<User[]> {
+  async getUsers(): Promise<UserDTO[]> {
     const users = await this.userService.findAll();
     return users.map((user) => ({
-      ...user,
+      id: user.id,
+      email: user.email,
+      name: user.name,
       role: user.role as GqlRole,
     }));
   }
 
-  @Query(() => User, { nullable: true })
+  @Query(() => UserDTO, { nullable: true })
   @UseGuards(JwtAuthGuard)
   async getUserById(
     @CurrentUser() user: { userId: number },
-  ): Promise<User | null> {
+  ): Promise<UserDTO | null> {
     const currentUser = await this.userService.findById(user.userId);
     if (!currentUser) return null;
 
     return {
-      ...currentUser,
+      id: currentUser.id,
+      email: currentUser.email,
+      name: currentUser.name,
       role: currentUser.role as GqlRole,
     };
   }

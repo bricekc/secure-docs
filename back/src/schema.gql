@@ -6,6 +6,12 @@ type AuthResponse {
   access_token: String!
 }
 
+input CreateUserInput {
+  email: String!
+  name: String
+  password: String!
+}
+
 input DeleteFileInput {
   fileName: String!
   id: Float!
@@ -37,7 +43,7 @@ input LoginInput {
 
 type Mutation {
   createDocument(file: Upload!): Boolean!
-  createUser(input: UserDTO!): User!
+  createUser(input: CreateUserInput!): UserDTO!
   deleteFileInFolder(input: DeleteFileInput!): Boolean!
   login(input: LoginInput!): AuthResponse!
   logs(input: GetLogsInput!): [Log!]!
@@ -47,8 +53,8 @@ type Mutation {
 type Query {
   getDocumentContent(id: Float!): String!
   getFileUrl(id: Float!): String!
-  getUserById: User
-  getUsers: [User!]!
+  getUserById: UserDTO
+  getUsers: [UserDTO!]!
   hello: String!
   listFilesInFolder: [Document!]!
 }
@@ -80,9 +86,9 @@ type User {
   role: Role!
 }
 
-input UserDTO {
+type UserDTO {
   email: String!
+  id: Int!
   name: String
-  password: String!
-  role: Role! = USER
+  role: Role!
 }

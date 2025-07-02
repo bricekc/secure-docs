@@ -8,7 +8,7 @@ import { Queue } from 'bullmq';
 import { PrismaService } from '../prisma.service';
 import { Document } from '@prisma/client';
 import { AzureBlobService } from '../worker/azure-blob.storage';
-import { LogProducerService } from 'src/log/log-producer.service';
+import { LogProducerService } from '../log/log-producer.service';
 
 @Injectable()
 export class DocumentService {

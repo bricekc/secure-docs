@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserResolver } from './user.resolver';
 import { UserService } from './user.service';
-import { UserDTO } from './dto/UserDTO';
 import { Role, User } from './user.model';
+import { CreateUserInput } from './dto/CreateUserInput';
 
 describe('UserResolver', () => {
   let resolver: UserResolver;
@@ -31,25 +31,27 @@ describe('UserResolver', () => {
 
   describe('createUser', () => {
     it('should create and return a user', async () => {
-      const input: UserDTO = {
+      const input: CreateUserInput = {
         email: 'johndoe@gmail.com',
         password: 'password',
-        role: Role.USER,
+        name: 'johndoe',
       };
 
       const createdUser: User = {
         id: 1,
         email: input.email,
+        name: 'johndoe',
         password: input.password,
-        role: input.role!,
+        role: Role.USER,
       };
 
       userService.create!.mockResolvedValue(createdUser);
 
       const result = await resolver.createUser(input);
+      const { password, ...expectedResult } = createdUser;
       expect(result).toEqual({
-        ...createdUser,
-        role: input.role,
+        ...expectedResult,
+        role: Role.USER,
       });
       expect(userService.create).toHaveBeenCalledWith(input);
     });
@@ -93,8 +95,10 @@ describe('UserResolver', () => {
       userService.findById!.mockResolvedValue(userMock);
 
       const result = await resolver.getUserById({ userId: 1 });
+      const { password, ...expectedResult } = userMock;
+
       expect(result).toEqual({
-        ...userMock,
+        ...expectedResult,
         role: Role.USER,
       });
       expect(userService.findById).toHaveBeenCalledWith(1);

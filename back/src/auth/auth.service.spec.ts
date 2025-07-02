@@ -4,11 +4,13 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { LogProducerService } from 'src/log/log-producer.service';
 
 describe('AuthService', () => {
   let service: AuthService;
   let prisma: { user: any };
   let jwtService: { sign: jest.Mock };
+  let logProducerService: { addLog: jest.Mock };
 
   beforeEach(async () => {
     prisma = {
@@ -21,11 +23,16 @@ describe('AuthService', () => {
       sign: jest.fn(),
     };
 
+    logProducerService = {
+      addLog: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
         { provide: PrismaService, useValue: prisma },
         { provide: JwtService, useValue: jwtService },
+        { provide: LogProducerService, useValue: logProducerService },
       ],
     }).compile();
 
@@ -52,7 +59,7 @@ describe('AuthService', () => {
       jwtService.sign.mockReturnValue('mocked.jwt.token');
 
       // mock bcrypt
-      jest.spyOn(bcrypt, 'compare').mockResolvedValue(true);
+      jest.spyOn(bcrypt, 'compare').mockImplementation(async () => true);
 
       const result = await service.login(email, password);
 
@@ -81,7 +88,7 @@ describe('AuthService', () => {
 
       prisma.user.findUnique.mockResolvedValue(user);
 
-      jest.spyOn(bcrypt, 'compare').mockResolvedValue(false);
+      jest.spyOn(bcrypt, 'compare').mockImplementation(async () => false);
 
       await expect(service.login(email, password)).rejects.toThrow(UnauthorizedException);
     });
