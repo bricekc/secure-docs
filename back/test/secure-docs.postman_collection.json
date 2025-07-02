@@ -46,7 +46,7 @@
 				"body": {
 					"mode": "graphql",
 					"graphql": {
-						"query": "mutation {\n  createUser(input: {\n    email: \"{{uniqueEmail}}\",\n    password: \"motdepasse\",\n    role: USER\n  }) {\n    id\n    email\n  }\n}\n",
+						"query": "mutation {\n  createUser(input: {\n    email: \"{{uniqueEmail}}\",\n    password: \"motdepasse\",\n    name: \"testuser\"\n  }) {\n    id\n    email\n  }\n}\n",
 						"variables": ""
 					}
 				},
