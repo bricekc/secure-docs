@@ -2,14 +2,18 @@ FROM node:lts-alpine3.22
 
 WORKDIR /app
 
-RUN npm install -g @nestjs/cli nodemon
+RUN npm install -g @nestjs/cli && apk add --no-cache dumb-init
 
 COPY package*.json ./
+RUN npm ci --only=production
 
-RUN npm install
+COPY prisma ./prisma/
+RUN npx prisma generate
 
 COPY . .
+RUN npm run build
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "npx prisma generate && npx prisma migrate deploy && npm run start:dev"]
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["sh", "-c", "npx prisma migrate deploy && npm run start:prod"]

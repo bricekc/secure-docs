@@ -7,6 +7,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.gard';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { DeleteFileInput } from './dto/DeleteFileInput';
 import { UpdateDocumentInput } from './dto/UpdateDocumentInput';
+import { UpdateDocumentContentInput } from './dto/UpdateDocumentContentInput';
 import { Stream } from 'stream';
 import GraphQLUpload, { FileUpload } from 'graphql-upload/GraphQLUpload.mjs';
 
@@ -53,6 +54,23 @@ export class DocumentResolver {
     const { createReadStream, filename } = await file;
     const stream = createReadStream();
     const buffer = await this.streamToBuffer(stream);
+
+    return await this.documentService.updateDocument(
+      id,
+      buffer,
+      filename,
+      user.userId,
+      user.email,
+    );
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(JwtAuthGuard)
+  async updateDocumentContent(
+    @Args('input') { id, content, filename }: UpdateDocumentContentInput,
+    @CurrentUser() user: { email: string; userId: number },
+  ): Promise<boolean> {
+    const buffer = Buffer.from(content, 'utf-8');
 
     return await this.documentService.updateDocument(
       id,

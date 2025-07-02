@@ -26,7 +26,7 @@ const authLink = setContext((_, { headers }) => {
 
 // Gestion des erreurs
 const errorLink = onError(
-  ({ graphQLErrors, networkError, operation, forward }) => {
+  ({ graphQLErrors, networkError }) => {
     if (graphQLErrors) {
       graphQLErrors.forEach(({ message, locations, path }) =>
         console.error(

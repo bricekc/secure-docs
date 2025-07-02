@@ -122,10 +122,7 @@ export type QueryGetFileUrlArgs = {
 };
 
 /** User role (admin or user) */
-export enum Role {
-  Admin = 'ADMIN',
-  User = 'USER'
-}
+export type Role = 'ADMIN' | 'USER';
 
 export type UpdateDocumentInput = {
   file: Scalars['Upload']['input'];

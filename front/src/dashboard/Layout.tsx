@@ -21,7 +21,12 @@ export default function DashboardLayout() {
   const { user, logout } = useAuth()
   const location = useLocation()
 
-  const navigation = [{ name: "Mes Documents", href: "/dashboard", icon: Home }]
+  const navigation = [
+    { name: "Mes Documents", href: "/dashboard", icon: Home },
+    ...(user?.role === "ADMIN"
+      ? [{ name: "Admin", href: "/dashboard/admin", icon: Shield }]
+      : []),
+  ];
 
   const handleChatSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
