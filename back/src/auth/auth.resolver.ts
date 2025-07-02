@@ -30,6 +30,7 @@ export class AuthResolver {
         id: user.id,
         email: user.email,
         role: user.role as GqlRole,
+        name: user.name,
       },
     };
   }
