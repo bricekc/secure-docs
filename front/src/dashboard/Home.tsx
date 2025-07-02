@@ -398,19 +398,6 @@ export default function DashboardHome() {
                     <div className="detail-row">
                       <strong>Type:</strong> {selectedDoc.types}
                     </div>
-                    {selectedDoc.url && (
-                      <div className="detail-row">
-                        <strong>URL:</strong>{" "}
-                        <a
-                          href={selectedDoc.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600"
-                        >
-                          {selectedDoc.url}
-                        </a>
-                      </div>
-                    )}
                   </div>
 
                   {/* Visualiseur de fichier */}
@@ -418,7 +405,9 @@ export default function DashboardHome() {
                     selectedDoc.types.toLowerCase() === "pdf" && (
                       <div className="pdf-viewer">
                         <iframe
-                          src={selectedDoc.url}
+                          src={`https://docs.google.com/viewer?url=${encodeURIComponent(
+                            selectedDoc.url
+                          )}&embedded=true`}
                           width="100%"
                           height="500px"
                           title={selectedDoc.name}
@@ -433,27 +422,18 @@ export default function DashboardHome() {
                       selectedDoc.types.toLowerCase() === "xlsx" ||
                       selectedDoc.types.toLowerCase() === "pptx") && (
                       <div className="office-viewer">
-                        <h4 className="viewer-title">
-                          Document {selectedDoc.types}
-                        </h4>
-                        <div className="office-preview bg-gray-100 p-8 rounded border text-center">
-                          <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                          <p className="text-gray-600 mb-4">
-                            <strong>Fichier Microsoft Office détecté</strong>
-                            <br />
-                            Les fichiers {selectedDoc.types} ne peuvent pas être
-                            prévisualisés dans le navigateur.
-                          </p>
-                          <div className="bg-blue-50 p-4 rounded border">
-                            <p className="text-sm text-blue-800">
-                              <strong>💡 Pour consulter ce document :</strong>
-                              <br />• Cliquez sur "Télécharger" pour ouvrir le
-                              fichier dans l'application appropriée
-                              <br />• Microsoft Word, Excel ou PowerPoint selon
-                              le type de fichier
-                            </p>
-                          </div>
-                        </div>
+                        <iframe
+                          src={`https://docs.google.com/viewer?url=${encodeURIComponent(
+                            selectedDoc.url
+                          )}&embedded=true`}
+                          width="100%"
+                          height="500px"
+                          title={selectedDoc.name}
+                          className="office-frame border rounded"
+                          onError={() =>
+                            console.error("Erreur chargement document Office")
+                          }
+                        />
                       </div>
                     )}
 
