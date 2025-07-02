@@ -4,6 +4,7 @@
 
 type AuthResponse {
   access_token: String!
+  user: UserDTO!
 }
 
 input CreateUserInput {

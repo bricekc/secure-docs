@@ -30,6 +30,14 @@ export class AuthService {
       `User ${user.email} logged in successfully`,
     );
 
-    return { access_token };
+    return {
+      access_token,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        name: user.name,
+      },
+    };
   }
 }
