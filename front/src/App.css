@@ -264,6 +264,7 @@ body {
   border-radius: var(--radius);
   font-size: 1rem;
   transition: var(--transition);
+  padding: 2rem;
 }
 
 .form-input:focus {

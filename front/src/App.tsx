@@ -1,11 +1,16 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
-import LoginPage from "./pages/Login"
-import DashboardLayout from "./dashboard/Layout"
-import DashboardHome from "./dashboard/Home"
-import DashboardDocuments from "./dashboard/Documents"
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import LoginPage from "./pages/Login";
+import DashboardLayout from "./dashboard/Layout";
+import DashboardHome from "./dashboard/Home";
+import DashboardDocuments from "./dashboard/Documents";
 
-import { ProtectedRoute } from "./components/ProtectedRoute"
-import "./App.css"
+import { ProtectedRoute } from "./components/ProtectedRoute";
+import "./App.css";
 
 function App() {
   return (
@@ -23,14 +28,10 @@ function App() {
         >
           <Route index element={<DashboardHome />} />
           <Route path="documents" element={<DashboardDocuments />} />
-         
         </Route>
-        {/* Correction pour la faute de frappe */}
-        <Route path="/dashborad" element={<Navigate to="/dashboard" replace />} />
-        <Route path="/dashborad/*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Router>
-  )
+  );
 }
 
-export default App
+export default App;

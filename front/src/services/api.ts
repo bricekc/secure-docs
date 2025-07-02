@@ -1,8 +1,18 @@
+import { ApolloError } from "@apollo/client";
+import { apolloClient } from "./apollo-client";
+import {
+  CREATE_DOCUMENTS,
+  CREATE_USER,
+  GET_DOCUMENTS,
+  LOGIN,
+} from "./gql-requests";
+
 // Configuration de base pour les appels API
-const API_BASE_URL = import.meta.env.VITE_BACK_URL; // 👈 MODIFIER L'URL DE VOTRE BACKEND
+const API_BASE_URL = import.meta.env.VITE_BACK_URL;
 
 // Fonction utilitaire pour les appels API avec gestion du token
 async function apiCall(endpoint: string, options: RequestInit = {}) {
+  // A SUPPRIMER
   const token = localStorage.getItem("token");
 
   const config: RequestInit = {
@@ -26,57 +36,113 @@ async function apiCall(endpoint: string, options: RequestInit = {}) {
   return response.json();
 }
 
-// 🔐 SERVICES D'AUTHENTIFICATION
 export const authService = {
-  // 👈 CONNECTER À VOTRE ENDPOINT DE LOGIN
-  async login(email: string, password: string) {
-    return apiCall("/auth/login", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-    });
-    // Réponse attendue: { access_token: string, user: User }
+  async login(userData: { email: string; password: string }) {
+    try {
+      const { data } = await apolloClient.mutate({
+        mutation: LOGIN,
+        variables: {
+          email: userData.email,
+          password: userData.password,
+        },
+      });
+      return data;
+    } catch (error: unknown) {
+      if (error instanceof ApolloError) {
+        const message =
+          error.message ||
+          error.graphQLErrors[0]?.message ||
+          "Erreur lors de l'inscription";
+        throw new Error(message);
+      } else if (error instanceof Error) {
+        throw new Error(error.message);
+      } else {
+        throw new Error("Erreur lors de l'inscription");
+      }
+    }
   },
 
-  // 👈 CONNECTER À VOTRE ENDPOINT DE REGISTER
-  async register(userData: {
-    email: string;
-    password: string;
-    firstName: string;
-    lastName: string;
-  }) {
-    return apiCall("/auth/register", {
-      method: "POST",
-      body: JSON.stringify(userData),
-    });
-    // Réponse attendue: { access_token: string, user: User }
-  },
-
-  // 👈 CONNECTER À VOTRE ENDPOINT DE PROFIL
-  async getProfile() {
-    return apiCall("/auth/profile");
-    // Réponse attendue: User
+  async register(userData: { email: string; password: string; name: string }) {
+    try {
+      const { data } = await apolloClient.mutate({
+        mutation: CREATE_USER,
+        variables: {
+          email: userData.email,
+          name: userData.name,
+          password: userData.password,
+        },
+      });
+      return data;
+    } catch (error: unknown) {
+      if (error instanceof ApolloError) {
+        const message =
+          error.message ||
+          error.graphQLErrors[0]?.message ||
+          "Erreur lors de l'inscription";
+        throw new Error(message);
+      } else if (error instanceof Error) {
+        throw new Error(error.message);
+      } else {
+        throw new Error("Erreur lors de l'inscription");
+      }
+    }
   },
 };
 
-// 📄 SERVICES DE DOCUMENTS
 export const documentService = {
-  // 👈 CONNECTER À VOTRE ENDPOINT GET /documents
   async getDocuments() {
-    return apiCall("/documents");
-    // Réponse attendue: Document[]
+    try {
+      const { data } = await apolloClient.query({
+        query: GET_DOCUMENTS,
+      });
+      return data;
+    } catch (error: unknown) {
+      if (error instanceof ApolloError) {
+        const message =
+          error.message ||
+          error.graphQLErrors[0]?.message ||
+          "Erreur lors de l'inscription";
+        throw new Error(message);
+      } else if (error instanceof Error) {
+        throw new Error(error.message);
+      } else {
+        throw new Error("Erreur lors de l'inscription");
+      }
+    }
   },
 
-  // 👈 CONNECTER À VOTRE ENDPOINT POST /documents
-  async createDocument(documentData: {
-    title: string;
-    description: string;
-    type: string;
-  }) {
-    return apiCall("/documents", {
+  async createDocument(documentData: { file: File }) {
+    const formData = new FormData();
+    formData.append(
+      "operations",
+      JSON.stringify({
+        query: CREATE_DOCUMENTS.loc?.source.body,
+        variables: {
+          file: null,
+        },
+      })
+    );
+    formData.append("map", JSON.stringify({ "0": ["variables.file"] }));
+    formData.append("0", documentData.file);
+
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(`${API_BASE_URL}/graphql`, {
       method: "POST",
-      body: JSON.stringify(documentData),
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+      body: formData,
     });
-    // Réponse attendue: Document
+
+    if (!response.ok) {
+      const error = await response
+        .json()
+        .catch(() => ({ message: "Erreur réseau" }));
+      throw new Error(error.message || `Erreur ${response.status}`);
+    }
+
+    return response.json();
   },
 
   // 👈 CONNECTER À VOTRE ENDPOINT DELETE /documents/:id
