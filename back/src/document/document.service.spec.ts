@@ -132,6 +132,7 @@ describe('DocumentService', () => {
         fileBuffer,
         originalFilename,
         userEmail,
+        userId: 1,
       });
       expect(result).toBe(true);
     });
