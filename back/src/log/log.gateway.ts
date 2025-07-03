@@ -11,7 +11,7 @@ import { Server, Socket } from 'socket.io';
     origin: '*',
   },
 })
-export class DocumentGateway implements OnGatewayConnection {
+export class LogGateway implements OnGatewayConnection {
   @WebSocketServer()
   server: Server;
   constructor(private jwtService: JwtService) {}
@@ -26,24 +26,17 @@ export class DocumentGateway implements OnGatewayConnection {
     const tokenDecode:
       | { id: string; email: string; role: string; iat: number; exp: number }
       | Error = await this.jwtService.decode(userToken);
-    if (!(tokenDecode instanceof Error) && tokenDecode.id) {
-      this.connectedUsers.set(tokenDecode.id.toString(), client);
+    console.log('LogGateway handleConnection', userToken, tokenDecode);
+    if (!(tokenDecode instanceof Error) && tokenDecode.role === 'ADMIN') {
+      this.connectedUsers.set('logs', client);
     }
   }
 
-  sendDocumentUpload(userId: string, data: any) {
-    const userSocket = this.connectedUsers.get(userId);
+  sendNewLog(data: any) {
+    const userSocket = this.connectedUsers.get('logs');
     if (userSocket) {
-      console.log(`Sending document upload to user ${userId}`);
-      userSocket.emit('document-upload', data);
-    }
-  }
-
-  sendDocumentUpdate(userId: string, data: any) {
-    const userSocket = this.connectedUsers.get(userId);
-    if (userSocket) {
-      console.log(`Sending document update to user ${userId}`);
-      userSocket.emit('document-update', data);
+      console.log(`Sending new log`, data);
+      userSocket.emit('log', data);
     }
   }
 }

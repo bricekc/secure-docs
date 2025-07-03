@@ -1,10 +1,11 @@
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DocumentProcessor } from './worker.document.processor';
 import { PrismaService } from '../prisma.service';
 import { AzureBlobService } from './azure-blob.storage';
 import { DocumentGateway } from './document.gateway';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -16,6 +17,14 @@ import { DocumentGateway } from './document.gateway';
     }),
     BullModule.registerQueue({
       name: 'document-queue',
+    }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: { expiresIn: '1d' },
+      }),
+      inject: [ConfigService],
     }),
   ],
   providers: [

@@ -11,13 +11,11 @@ import {
   ImageIcon,
   Video,
   Music,
-  ExternalLink,
   Download,
 } from "lucide-react";
 import { documentService } from "../../services/api";
 import { io } from "socket.io-client";
 import toast from "react-hot-toast";
-import type { User } from "../../gql/graphql";
 import TextFileEditor from "../../components/TextFileEditor";
 
 interface Document {
@@ -72,7 +70,7 @@ export default function DashboardHome() {
     title: "",
     file: null as File | null,
   });
-  const user: User = JSON.parse(localStorage.getItem("user") || "{}");
+  const JWTToken: string = localStorage.getItem("token") || "";
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -82,7 +80,7 @@ export default function DashboardHome() {
     fetchDocuments();
 
     const socket = io(import.meta.env.VITE_WORKER_URL, {
-      query: { userId: user.id }, // Replace with actual user ID
+      query: { JWTToken },
     });
 
     socket.on("connect", () => {
@@ -122,7 +120,7 @@ export default function DashboardHome() {
     return () => {
       socket.disconnect();
     };
-  }, [user.id]);
+  }, [JWTToken]);
 
   const filteredDocuments = documents.filter((doc) => {
     const matchesSearch = doc.name
@@ -540,7 +538,6 @@ export default function DashboardHome() {
                         src={selectedDoc.url || "/placeholder.svg"}
                         alt={selectedDoc.name}
                         className="preview-image max-w-full max-h-96 object-contain mx-auto border rounded"
-                        onLoad={() => console.log("Image chargée avec succès")}
                         onError={(e) => {
                           console.error("Erreur chargement image");
                           e.currentTarget.src =
@@ -574,15 +571,6 @@ export default function DashboardHome() {
                     >
                       <Download className="w-4 h-4" />
                       Télécharger
-                    </button>
-                  )}
-                  {selectedDoc.url && (
-                    <button
-                      onClick={() => window.open(selectedDoc.url, "_blank")}
-                      className="btn-external"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                      Ouvrir
                     </button>
                   )}
                   <button

@@ -3,6 +3,9 @@ import { Module } from '@nestjs/common';
 import { LogService } from './log.service';
 import { LogResolver } from './log.resolver';
 import { LogProducerService } from './log-producer.service';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { LogGateway } from './log.gateway';
 
 @Module({
   imports: [
@@ -24,8 +27,16 @@ import { LogProducerService } from './log-producer.service';
         },
       },
     }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: { expiresIn: '1d' },
+      }),
+      inject: [ConfigService],
+    }),
   ],
-  providers: [LogService, LogResolver, LogProducerService],
+  providers: [LogService, LogResolver, LogProducerService, LogGateway],
   exports: [LogService, LogProducerService],
 })
 export class LogModule {}
