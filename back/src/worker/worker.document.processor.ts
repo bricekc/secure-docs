@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { AzureBlobService } from './azure-blob.storage';
 import { UpdateFileJob, UploadFileJob } from 'src/document/dto/UploadJobData';
+import { DocumentGateway } from './document.gateway';
 
 @Processor('document-queue')
 @Injectable()
@@ -11,19 +12,44 @@ export class DocumentProcessor extends WorkerHost {
   constructor(
     private prisma: PrismaService,
     private azureBlobService: AzureBlobService,
+    private documentGateway: DocumentGateway,
   ) {
     super();
   }
 
-  async process(job: Job<any, any, string>): Promise<any> {
+  async process(
+    job: Job<UploadFileJob | UpdateFileJob, any, string>,
+  ): Promise<any> {
     switch (job.name) {
       case 'upload-document':
-        return this.handleUploadFileToAzure(job);
+        return this.handleUploadFileToAzure(job as Job<UploadFileJob>);
       case 'update-document':
-        return this.handleUpdateFileInAzure(job);
+        return this.handleUpdateFileInAzure(job as Job<UpdateFileJob>);
       default:
         throw new Error(`Unknown job type: ${job.name}`);
     }
+  }
+
+  private async listFiles(id: number): Promise<any[]> {
+    const files = await this.prisma.document.findMany({
+      where: { userId: id },
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    return files.map((file) => {
+      file['url'] = this.azureBlobService.getFileSasUrl(
+        `${file.user.email}/${file.name}`,
+      );
+      file['types'] = file.name.split('.').pop();
+      return file;
+    });
   }
 
   private async handleUploadFileToAzure(job: Job<UploadFileJob>) {
@@ -45,6 +71,8 @@ export class DocumentProcessor extends WorkerHost {
       });
 
       console.log(`File uploaded successfully to Azure: ${url}`);
+      const updatedFiles = await this.listFiles(userId);
+      this.documentGateway.sendDocumentUpload(userId.toString(), updatedFiles);
       return { success: true, url };
     } catch (error) {
       console.error(`Failed to upload file ${azureFilename}:`, error);
@@ -53,7 +81,7 @@ export class DocumentProcessor extends WorkerHost {
   }
 
   private async handleUpdateFileInAzure(job: Job<UpdateFileJob>) {
-    const { id, fileBuffer, originalFilename, userEmail } = job.data;
+    const { id, fileBuffer, originalFilename, userEmail, userId } = job.data;
     const azureFilename = `${userEmail}/${originalFilename}`;
 
     const buffer = Buffer.from(fileBuffer.data);
@@ -69,6 +97,8 @@ export class DocumentProcessor extends WorkerHost {
       });
 
       console.log(`File updated successfully in Azure: ${url}`);
+      const updatedFiles = await this.listFiles(userId);
+      this.documentGateway.sendDocumentUpdate(userId.toString(), updatedFiles);
       return { success: true, url };
     } catch (error) {
       console.error(`Failed to update file ${azureFilename}:`, error);

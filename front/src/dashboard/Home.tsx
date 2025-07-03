@@ -15,6 +15,9 @@ import {
   Download,
 } from "lucide-react";
 import { documentService } from "../services/api";
+import { io } from "socket.io-client";
+import toast from "react-hot-toast";
+import type { User } from "../gql/graphql";
 
 interface Document {
   id: number;
@@ -69,6 +72,7 @@ export default function DashboardHome() {
     title: "",
     file: null as File | null,
   });
+  const user: User = JSON.parse(localStorage.getItem("user") || "{}");
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -76,7 +80,43 @@ export default function DashboardHome() {
       setDocuments(userDocuments.listFilesInFolder);
     };
     fetchDocuments();
-  }, []);
+
+    const socket = io(import.meta.env.VITE_WORKER_URL, {
+      query: { userId: user.id }, // Replace with actual user ID
+    });
+
+    socket.on("connect", () => {
+      console.log("Connected to socket server");
+    });
+
+    socket.on("document-upload", (data) => {
+      console.log("data upload : ", data[0]);
+      toast.success(`New document uploaded: ${data[0].name}`, {
+        style: { backgroundColor: "#2563eb", color: "#ffffff" },
+        iconTheme: {
+          primary: "#ffffff",
+          secondary: "#2563eb",
+        },
+      });
+      setDocuments((prevDocs) => [...prevDocs, data[0]]);
+    });
+
+    socket.on("document-update", (data) => {
+      console.log("data update : ", data[0]);
+      toast.success(`Document updated: ${data[0].name}`);
+      setDocuments((prevDocs) =>
+        prevDocs.map((doc) => (doc.id === data[0].id ? data[0] : doc))
+      );
+    });
+
+    socket.on("disconnect", () => {
+      console.log("Disconnected from socket server");
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [user.id]);
 
   const filteredDocuments = documents.filter((doc) => {
     const matchesSearch = doc.name
@@ -112,15 +152,17 @@ export default function DashboardHome() {
   };
 
   const handleDelete = async (id: number) => {
-      const response = await documentService.deleteDocument(selectedDoc?.name || "",  id);
-      if (response) {
-        setDocuments((docs) => docs.filter((doc) => doc.id !== id));
-        if (selectedDoc && selectedDoc.id === id) {
-          setShowModal(false);
-          setSelectedDoc(null);
-        }
+    const response = await documentService.deleteDocument(
+      selectedDoc?.name || "",
+      id
+    );
+    if (response) {
+      setDocuments((docs) => docs.filter((doc) => doc.id !== id));
+      if (selectedDoc && selectedDoc.id === id) {
+        setShowModal(false);
+        setSelectedDoc(null);
       }
-    
+    }
   };
 
   const handleView = (doc: Document) => {
