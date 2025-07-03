@@ -1,4 +1,6 @@
 import { Injectable, HttpException } from '@nestjs/common';
+import * as fs from 'fs';
+import * as path from 'path';
 
 interface GeminiResponse {
   candidates?: {
@@ -20,12 +22,29 @@ export class GeminiService {
       throw new HttpException('Configuration error with AI service.', 500);
     }
 
+    const readmePath = path.join(__dirname, 'context.txt');
+    let readmeContent = '';
+
+    try {
+      readmeContent = fs.readFileSync(readmePath, 'utf-8');
+    } catch {
+      console.warn(
+        'Context file not found, proceeding without project context',
+      );
+    }
+
     const body = {
       contents: [
         {
           parts: [
             {
-              text: `Tu es un assistant IA professionnel pour une plateforme de gestion documentaire appelée Secure Docs. Tu aides les utilisateurs avec leurs questions sur la gestion de documents, la sécurité, l'organisation de fichiers, et toute question générale. Réponds en français de manière claire, utile et professionnelle. Question de l'utilisateur: ${message}`,
+              text: `CONTEXTE DU PROJET:\n${readmeContent}`,
+            },
+            {
+              text: `INSTRUCTIONS: Tu es un assistant IA professionnel pour une plateforme de gestion documentaire appelée Secure Docs. Tu aides les utilisateurs avec leurs questions sur la gestion de documents, la sécurité, l'organisation de fichiers, et toute question générale. Utilise le contexte du projet fourni ci-dessus pour donner des réponses précises et pertinentes. Réponds en français de manière claire, utile et professionnelle.`,
+            },
+            {
+              text: `QUESTION DE L'UTILISATEUR: ${message}`,
             },
           ],
         },

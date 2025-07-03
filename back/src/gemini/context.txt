@@ -1,0 +1,54 @@
+Contexte du Projet Secure Docs pour Chatbot :
+
+Le projet Secure Docs est une application complète composée d'un frontend et d'un backend, conçue pour la gestion sécurisée de documents.
+
+--- Frontend (secure-docs/front) ---
+
+**Description :** Le frontend est l'interface utilisateur de l'application Secure Docs. Il permet aux utilisateurs d'interagir avec le système pour gérer leurs documents.
+
+**Technologies Principales :**
+- **React :** Bibliothèque JavaScript pour la construction d'interfaces utilisateur.
+- **TypeScript :** Langage de programmation qui ajoute le typage statique à JavaScript.
+- **Apollo Client :** Bibliothèque de gestion d'état GraphQL pour React.
+- **Tailwind CSS :** Framework CSS utilitaire pour un stylisme rapide et personnalisé.
+
+**Fonctionnalités :**
+- Interface utilisateur intuitive pour la gestion des documents.
+- Interaction avec l'API GraphQL du backend.
+- Affichage en temps réel des mises à jour de documents et des logs.
+
+--- Backend (secure-docs/back) ---
+
+**Description :** Le backend est le cœur de l'application Secure Docs. Il gère l'authentification des utilisateurs, la gestion des documents, le stockage sécurisé des fichiers et expose une API GraphQL.
+
+**Technologies Principales :**
+- **NestJS :** Framework Node.js pour des applications côté serveur robustes et évolutives.
+- **GraphQL (Code-First) :** Utilisation de décorateurs TypeScript pour générer automatiquement le schéma GraphQL, assurant une source unique de vérité et une sécurité des types.
+- **Prisma :** ORM de nouvelle génération pour l'interaction avec la base de données PostgreSQL.
+- **PostgreSQL :** Base de données relationnelle pour le stockage des données.
+- **Azure Blob Storage :** Pour le stockage sécurisé et évolutif des fichiers documents.
+- **Redis & BullMQ :** Utilisés pour un système de workers en arrière-plan, gérant les tâches longues comme le téléversement de fichiers.
+- **Passport-JWT :** Pour l'authentification sécurisée basée sur les tokens JWT.
+
+**Architecture :**
+- **API GraphQL :** Point d'entrée principal pour le frontend.
+- **Base de Données & Prisma :** Gestion des données avec un ORM typé.
+- **Tâches d'Arrière-plan & Workers :** Traitement asynchrone des opérations gourmandes en ressources.
+- **Communication en Temps Réel (WebSockets) :**
+    - `LogGateway` : Diffusion des logs en temps réel aux administrateurs.
+    - `DocumentGateway` : Notifications en temps réel sur le statut des téléversements et mises à jour de documents.
+
+**Fonctionnalités :**
+- Gestion des utilisateurs (inscription, connexion).
+- Authentification JWT et contrôle d'accès basé sur les rôles.
+- Opérations CRUD pour les documents.
+- Téléversement sécurisé et asynchrone de fichiers.
+- Journalisation en temps réel.
+
+**Conteneurisation avec Docker :**
+- `Dockerfile` : Pour l'application NestJS principale.
+- `Dockerfile.worker` : Pour le worker d'arrière-plan.
+Permet un déploiement simplifié et une cohérence environnementale.
+
+**Organisation Générale du Projet :**
+Le projet est divisé en deux dépôts distincts (frontend et backend) qui communiquent via une API GraphQL. Le backend utilise des workers pour les tâches asynchrones et des WebSockets pour la communication en temps réel, assurant une expérience utilisateur fluide et réactive. Le déploiement est facilité par Docker.
