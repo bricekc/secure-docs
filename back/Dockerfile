@@ -7,8 +7,8 @@ RUN npm install --omit=dev
 
 COPY . .
 
-RUN npm run build && npx prisma generate
+RUN npm run build
 
 EXPOSE 3000
 
-CMD ["npm", "run", "start:prod"]
+CMD ["sh", "-c", "npx prisma generate && npm run start:prod"]
