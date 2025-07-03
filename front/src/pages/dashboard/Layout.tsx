@@ -36,7 +36,9 @@ export default function DashboardLayout() {
   const { user, logout } = useAuth();
   const location = useLocation();
 
-  const [sendMessage, { loading: mutationLoading }] = useMutation(SEND_MESSAGE_MUTATION);
+  const [sendMessage, { loading: mutationLoading }] = useMutation(
+    SEND_MESSAGE_MUTATION
+  );
 
   const navigation = [
     { name: "Mes Documents", href: "/dashboard", icon: Home },
@@ -140,25 +142,6 @@ export default function DashboardLayout() {
           </div>
         </div>
       </header>
-
-      {/* Sidebar */}
-      <aside className="sidebar">
-        <nav className="sidebar-nav">
-          {navigation.map((item) => {
-            const isActive = location.pathname === item.href;
-            return (
-              <Link
-                key={item.name}
-                to={item.href}
-                className={`nav-item ${isActive ? "nav-item-active" : ""}`}
-              >
-                <item.icon className="nav-icon" />
-                <span className="nav-text">{item.name}</span>
-              </Link>
-            );
-          })}
-        </nav>
-      </aside>
 
       {/* Mobile Menu */}
       {sidebarOpen && (
@@ -264,7 +247,11 @@ export default function DashboardLayout() {
                 className="chat-input"
                 disabled={mutationLoading}
               />
-              <button type="submit" className="chat-send" disabled={mutationLoading}>
+              <button
+                type="submit"
+                className="chat-send"
+                disabled={mutationLoading}
+              >
                 {mutationLoading ? "..." : "Envoyer"}
               </button>
             </form>

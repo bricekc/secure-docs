@@ -669,12 +669,6 @@ body {
   transition: var(--transition-slow);
 }
 
-@media (min-width: 768px) {
-  .main-content {
-    margin-left: 16rem;
-  }
-}
-
 .content-wrapper {
   padding: 2rem;
   animation: fadeIn 0.6s ease;
