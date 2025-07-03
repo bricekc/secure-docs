@@ -55,6 +55,7 @@ type Mutation {
 }
 
 type Query {
+  getCurrentUser: UserDTO
   getDocumentContent(id: Float!): String!
   getFileUrl(id: Float!): String!
   getUserById: UserDTO

@@ -62,7 +62,7 @@ export class DocumentProcessor extends WorkerHost {
       console.log(`Starting Azure upload for file: ${azureFilename}`);
       const url = await this.azureBlobService.uploadFile(azureFilename, buffer);
 
-      await this.prisma.document.create({
+      const data = await this.prisma.document.create({
         data: {
           name: originalFilename,
           status: 'uploaded',
@@ -71,8 +71,11 @@ export class DocumentProcessor extends WorkerHost {
       });
 
       console.log(`File uploaded successfully to Azure: ${url}`);
-      const updatedFiles = await this.listFiles(userId);
-      this.documentGateway.sendDocumentUpload(userId.toString(), updatedFiles);
+      data['url'] = this.azureBlobService.getFileSasUrl(
+        `${userEmail}/${originalFilename}`,
+      );
+      data['types'] = originalFilename.split('.').pop();
+      this.documentGateway.sendDocumentUpload(userId.toString(), data);
       return { success: true, url };
     } catch (error) {
       console.error(`Failed to upload file ${azureFilename}:`, error);

@@ -34,7 +34,7 @@ export class DocumentGateway implements OnGatewayConnection {
   sendDocumentUpload(userId: string, data: any) {
     const userSocket = this.connectedUsers.get(userId);
     if (userSocket) {
-      console.log(`Sending document upload to user ${userId}`);
+      console.log(`Sending document upload to user ${userId}, ${data}`);
       userSocket.emit('document-upload', data);
     }
   }

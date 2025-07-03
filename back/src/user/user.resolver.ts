@@ -6,6 +6,7 @@ import { UseGuards } from '@nestjs/common';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { UserDTO } from './dto/UserDTO';
 import { AdminGuard } from 'src/auth/admin.guard';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.gard';
 
 @Resolver(() => UserDTO)
 export class UserResolver {
@@ -47,6 +48,22 @@ export class UserResolver {
       email: currentUser.email,
       name: currentUser.name,
       role: currentUser.role as GqlRole,
+    };
+  }
+
+  @Query(() => UserDTO, { nullable: true })
+  @UseGuards(JwtAuthGuard)
+  async getCurrentUser(
+    @CurrentUser() user: { userId: number },
+  ): Promise<UserDTO | null> {
+    const userReturn = await this.userService.findById(user.userId);
+    if (!userReturn) return null;
+
+    return {
+      id: userReturn.id,
+      email: userReturn.email,
+      name: userReturn.name,
+      role: userReturn.role as GqlRole,
     };
   }
 }

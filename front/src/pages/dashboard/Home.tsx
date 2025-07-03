@@ -88,15 +88,15 @@ export default function DashboardHome() {
     });
 
     socket.on("document-upload", (data) => {
-      console.log("data upload : ", data[0]);
-      toast.success(`New document uploaded: ${data[0].name}`, {
+      console.log("data upload : ", data);
+      toast.success(`New document uploaded: ${data.name}`, {
         style: { backgroundColor: "#2563eb", color: "#ffffff" },
         iconTheme: {
           primary: "#ffffff",
           secondary: "#2563eb",
         },
       });
-      setDocuments((prevDocs) => [...prevDocs, data[0]]);
+      setDocuments((prevDocs) => [...prevDocs, data]);
     });
 
     socket.on("document-update", (data) => {
@@ -176,7 +176,6 @@ export default function DashboardHome() {
   };
 
   const handleView = (doc: Document) => {
-    // Ouvrir le modal pour TOUS les types de documents (y compris les URLs)
     setSelectedDoc(doc);
     setShowModal(true);
   };

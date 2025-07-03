@@ -34,7 +34,12 @@ export class UserService {
   }
 
   findById(id: number) {
-    return this.prisma.user.findUnique({ where: { id } });
+    try {
+      return this.prisma.user.findUnique({ where: { id } });
+    } catch (error) {
+      console.error('Error finding user by ID:', error);
+      throw new Error('User not found');
+    }
   }
 
   findAll() {
