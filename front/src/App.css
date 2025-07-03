@@ -2568,3 +2568,221 @@ a:focus-visible {
   opacity: 0.3;
   filter: blur(4px);
 }
+
+/* ===== TEXT FILE EDITOR ===== */
+.text-editor-container {
+  background: white;
+  border-radius: var(--radius-lg);
+  overflow: hidden !important;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  animation: fadeIn 0.3s ease;
+}
+
+.editor-header {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  color: white;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.editor-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.text-editor-textarea {
+  width: 100%;
+  height: 24rem;
+  padding: 1.5rem;
+  border: none;
+  outline: none;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  resize: vertical;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  transition: var(--transition);
+}
+
+.text-editor-textarea.editing {
+  background: white;
+  border-left: 4px solid var(--primary);
+}
+
+.text-editor-textarea.readonly {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  cursor: default;
+}
+
+.text-editor-textarea:focus {
+  background: white;
+  box-shadow: inset 0 0 0 2px var(--primary);
+}
+
+.text-editor-textarea::placeholder {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.editor-actions {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.button-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Amélioration des boutons pour l'éditeur */
+.editor-actions .primary-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+
+.editor-actions .primary-button:hover {
+  background: linear-gradient(135deg, var(--primary-hover) 0%, var(--primary) 100%);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.editor-actions .secondary-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: white;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.editor-actions .secondary-button:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--border-dark);
+  transform: translateY(-1px);
+}
+
+/* Indicateur de statut d'édition */
+.text-editor-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--primary);
+  opacity: 0;
+  transition: var(--transition);
+}
+
+.text-editor-container:has(.editing)::before {
+  opacity: 1;
+}
+
+/* Messages de chargement et d'erreur stylisés */
+.editor-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.editor-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  color: var(--danger);
+  font-size: 0.875rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius);
+  margin: 1rem;
+}
+
+/* Responsive pour l'éditeur */
+@media (max-width: 768px) {
+  .text-editor-textarea {
+    height: 18rem;
+    padding: 1rem;
+    font-size: 0.8rem;
+  }
+  
+  .editor-header {
+    padding: 1rem;
+  }
+  
+  .editor-title {
+    font-size: 0.9rem;
+  }
+  
+  .editor-actions {
+    padding: 1rem;
+    gap: 0.5rem;
+  }
+  
+  .editor-actions .primary-button,
+  .editor-actions .secondary-button {
+    padding: 0.625rem 1rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .text-editor-textarea {
+    height: 16rem;
+    padding: 0.75rem;
+  }
+  
+  .editor-actions {
+    flex-direction: column;
+  }
+  
+  .editor-actions .primary-button,
+  .editor-actions .secondary-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Animation pour les changements d'état */
+.text-editor-textarea {
+  transition: all 0.3s ease;
+}
+
+.text-editor-container {
+  position: relative;
+  overflow: visible;
+}
