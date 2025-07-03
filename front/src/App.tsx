@@ -7,13 +7,16 @@ import {
 import LoginPage from "./pages/Login";
 import DashboardLayout from "./dashboard/Layout";
 import DashboardHome from "./dashboard/Home";
+import { Toaster } from "react-hot-toast";
 
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import "./App.css";
 
 function App() {
   return (
-    <Router>
+    <>
+      <Toaster />
+      <Router>
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<LoginPage />} />
@@ -29,6 +32,7 @@ function App() {
         </Route>
       </Routes>
     </Router>
+    </>
   );
 }
 

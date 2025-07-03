@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { DocumentProcessor } from './worker.document.processor';
 import { PrismaService } from '../prisma.service';
 import { AzureBlobService } from './azure-blob.storage';
+import { DocumentGateway } from './document.gateway';
 
 @Module({
   imports: [
@@ -15,6 +16,11 @@ import { AzureBlobService } from './azure-blob.storage';
       name: 'document-queue',
     }),
   ],
-  providers: [DocumentProcessor, PrismaService, AzureBlobService],
+  providers: [
+    DocumentProcessor,
+    PrismaService,
+    AzureBlobService,
+    DocumentGateway,
+  ],
 })
 export class WorkerModule {}

@@ -11,4 +11,5 @@ export interface UpdateFileJob {
   fileBuffer: { type: 'Buffer'; data: number[] };
   originalFilename: string;
   userEmail: string;
+  userId: number;
 }
