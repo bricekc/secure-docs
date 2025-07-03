@@ -14,11 +14,11 @@ import {
   ExternalLink,
   Download,
 } from "lucide-react";
-import { documentService } from "../services/api";
+import { documentService } from "../../services/api";
 import { io } from "socket.io-client";
 import toast from "react-hot-toast";
-import type { User } from "../gql/graphql";
-import TextFileEditor from "../components/TextFileEditor";
+import type { User } from "../../gql/graphql";
+import TextFileEditor from "../../components/TextFileEditor";
 
 interface Document {
   id: number;
@@ -103,7 +103,13 @@ export default function DashboardHome() {
 
     socket.on("document-update", (data) => {
       console.log("data update : ", data[0]);
-      toast.success(`Document updated: ${data[0].name}`);
+      toast.success(`Document updated: ${data[0].name}`, {
+        style: { backgroundColor: "#2563eb", color: "#ffffff" },
+        iconTheme: {
+          primary: "#ffffff",
+          secondary: "#2563eb",
+        },
+      });
       setDocuments((prevDocs) =>
         prevDocs.map((doc) => (doc.id === data[0].id ? data[0] : doc))
       );
@@ -155,7 +161,6 @@ export default function DashboardHome() {
 
   const handleEditCancel = () => {
     setEditingId(null);
-    
   };
 
   const handleDelete = async (id: number) => {
@@ -412,42 +417,48 @@ export default function DashboardHome() {
             <div className="modal-body-large">
               {editingId === selectedDoc.id ? (
                 <div className="form-group">
-                <label className="form-label">Fichier *</label>
-                <div className="file-upload-container">
-                  <input
-                    type="file"
-                    onChange={(e) => {
-                      const selectedFile = e.target.files?.[0] || null;
-                      if (selectedFile && selectedDoc && selectedFile.name !== selectedDoc.name) {
-                        alert("Le nom du fichier doit être le même que le document existant.");
-                        e.target.value = "";
-                        setNewDoc({ ...newDoc, file: null });
-                      } else {
-                        setNewDoc({
-                          ...newDoc,
-                          file: selectedFile,
-                        });
-                      }
-                    }}
-                    className="form-input"
-                    accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.mp4,.avi,.mov,.jpg,.jpeg,.png,.gif,.mp3,.wav,.ogg"
-                    required
-                  />
-                  <p
-                    style={{
-                      color: "#6B7280",
-                      fontSize: "0.875rem",
-                      marginTop: "0.5rem",
-                      marginBottom: "1rem",
-                      textAlign: "center",
-                      fontStyle: "italic",
-                    }}
-                  >
-                    Glissez-déposez votre fichier ici ou cliquez pour
-                    sélectionner
-                  </p>
+                  <label className="form-label">Fichier *</label>
+                  <div className="file-upload-container">
+                    <input
+                      type="file"
+                      onChange={(e) => {
+                        const selectedFile = e.target.files?.[0] || null;
+                        if (
+                          selectedFile &&
+                          selectedDoc &&
+                          selectedFile.name !== selectedDoc.name
+                        ) {
+                          alert(
+                            "Le nom du fichier doit être le même que le document existant."
+                          );
+                          e.target.value = "";
+                          setNewDoc({ ...newDoc, file: null });
+                        } else {
+                          setNewDoc({
+                            ...newDoc,
+                            file: selectedFile,
+                          });
+                        }
+                      }}
+                      className="form-input"
+                      accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.mp4,.avi,.mov,.jpg,.jpeg,.png,.gif,.mp3,.wav,.ogg"
+                      required
+                    />
+                    <p
+                      style={{
+                        color: "#6B7280",
+                        fontSize: "0.875rem",
+                        marginTop: "0.5rem",
+                        marginBottom: "1rem",
+                        textAlign: "center",
+                        fontStyle: "italic",
+                      }}
+                    >
+                      Glissez-déposez votre fichier ici ou cliquez pour
+                      sélectionner
+                    </p>
+                  </div>
                 </div>
-              </div>
               ) : (
                 <div className="document-viewer">
                   {/* Informations du document */}

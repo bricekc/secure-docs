@@ -69,6 +69,7 @@ export class DocumentService {
       fileBuffer,
       originalFilename,
       userEmail,
+      userId,
     });
 
     await this.logProducerService.addLog(

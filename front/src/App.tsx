@@ -5,8 +5,8 @@ import {
   Navigate,
 } from "react-router-dom";
 import LoginPage from "./pages/Login";
-import DashboardLayout from "./dashboard/Layout";
-import DashboardHome from "./dashboard/Home";
+import DashboardLayout from "./pages/dashboard/Layout";
+import DashboardHome from "./pages/dashboard/Home";
 import { Toaster } from "react-hot-toast";
 import AdminPage from "./pages/AdminPage";
 
@@ -18,22 +18,22 @@ function App() {
     <>
       <Toaster />
       <Router>
-      <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <DashboardLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<DashboardHome />} />
-        <Route path="admin" element={<AdminPage />} />
-        </Route>
-      </Routes>
-    </Router>
+        <Routes>
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<DashboardHome />} />
+            <Route path="admin" element={<AdminPage />} />
+          </Route>
+        </Routes>
+      </Router>
     </>
   );
 }

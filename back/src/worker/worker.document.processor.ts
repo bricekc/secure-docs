@@ -96,7 +96,9 @@ export class DocumentProcessor extends WorkerHost {
         data: { status: 'updated' },
       });
 
-      console.log(`File updated successfully in Azure: ${url}`);
+      console.log(
+        `File updated successfully in Azure: ${url}, by user: ${userId}`,
+      );
       const updatedFiles = await this.listFiles(userId);
       this.documentGateway.sendDocumentUpdate(userId.toString(), updatedFiles);
       return { success: true, url };
