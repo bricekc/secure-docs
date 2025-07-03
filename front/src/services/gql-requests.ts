@@ -65,7 +65,24 @@ export const GET_DOCUMENT_CONTENT = gql`
 `;
 
 export const UPDATE_DOCUMENT_CONTENT = gql`
-  mutation updateDocumentContent($id: Int!, $content: String!, $filename: String!) {
-    updateDocumentContent(input: { id: $id, content: $content, filename: $filename })
+  mutation updateDocumentContent(
+    $id: Int!
+    $content: String!
+    $filename: String!
+  ) {
+    updateDocumentContent(
+      input: { id: $id, content: $content, filename: $filename }
+    )
+  }
+`;
+
+export const GET_CURRENT_USER = gql`
+  query {
+    getCurrentUser {
+      email
+      id
+      name
+      role
+    }
   }
 `;

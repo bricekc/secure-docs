@@ -22,6 +22,7 @@ export type Scalars = {
 export type AuthResponse = {
   __typename?: 'AuthResponse';
   access_token: Scalars['String']['output'];
+  user: UserDto;
 };
 
 export type CreateUserInput = {
@@ -40,7 +41,9 @@ export type Document = {
   id: Scalars['Int']['output'];
   name: Scalars['String']['output'];
   status: Scalars['String']['output'];
-  user: Array<User>;
+  types: Scalars['String']['output'];
+  url: Maybe<Scalars['String']['output']>;
+  user: User;
   userId: Scalars['Float']['output'];
 };
 
@@ -69,6 +72,7 @@ export type Mutation = {
   login: AuthResponse;
   logs: Array<Log>;
   updateDocument: Scalars['Boolean']['output'];
+  updateDocumentContent: Scalars['Boolean']['output'];
 };
 
 
@@ -101,8 +105,14 @@ export type MutationUpdateDocumentArgs = {
   input: UpdateDocumentInput;
 };
 
+
+export type MutationUpdateDocumentContentArgs = {
+  input: UpdateDocumentContentInput;
+};
+
 export type Query = {
   __typename?: 'Query';
+  getCurrentUser: Maybe<UserDto>;
   getDocumentContent: Scalars['String']['output'];
   getFileUrl: Scalars['String']['output'];
   getUserById: Maybe<UserDto>;
@@ -122,7 +132,16 @@ export type QueryGetFileUrlArgs = {
 };
 
 /** User role (admin or user) */
-export type Role = 'ADMIN' | 'USER';
+export enum Role {
+  Admin = 'ADMIN',
+  User = 'USER'
+}
+
+export type UpdateDocumentContentInput = {
+  content: Scalars['String']['input'];
+  filename: Scalars['String']['input'];
+  id: Scalars['Int']['input'];
+};
 
 export type UpdateDocumentInput = {
   file: Scalars['Upload']['input'];

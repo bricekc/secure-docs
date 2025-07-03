@@ -25,27 +25,25 @@ const authLink = setContext((_, { headers }) => {
 });
 
 // Gestion des erreurs
-const errorLink = onError(
-  ({ graphQLErrors, networkError }) => {
-    if (graphQLErrors) {
-      graphQLErrors.forEach(({ message, locations, path }) =>
-        console.error(
-          `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
-        )
-      );
-    }
+const errorLink = onError(({ graphQLErrors, networkError }) => {
+  if (graphQLErrors) {
+    graphQLErrors.forEach(({ message, locations, path }) =>
+      console.error(
+        `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
+      )
+    );
+  }
 
-    if (networkError) {
-      console.error(`[Network error]: ${networkError}`);
+  if (networkError) {
+    console.error(`[Network error]: ${networkError}`);
 
-      // Redirection vers login si erreur 401
-      if ("statusCode" in networkError && networkError.statusCode === 401) {
-        localStorage.removeItem("token");
-        window.location.href = "/login";
-      }
+    // Redirection vers login si erreur 401
+    if ("statusCode" in networkError && networkError.statusCode === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/login";
     }
   }
-);
+});
 
 // Création du client Apollo
 export const apolloClient = new ApolloClient({
@@ -60,3 +58,7 @@ export const apolloClient = new ApolloClient({
     },
   },
 });
+
+export const resetApolloClient = async () => {
+  await apolloClient.resetStore();
+};

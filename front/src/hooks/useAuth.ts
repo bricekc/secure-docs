@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface User {
@@ -15,6 +15,13 @@ export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
 
+  const logout = useCallback(() => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+    navigate("/login");
+  }, [navigate]);
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     const userData = localStorage.getItem("user");
@@ -27,14 +34,7 @@ export function useAuth() {
         logout();
       }
     }
-  }, []);
-
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setUser(null);
-    navigate("/login");
-  };
+  }, [logout]);
 
   return { user, logout };
 }

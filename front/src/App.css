@@ -1623,6 +1623,28 @@ a:focus-visible {
   text-align: center;
 }
 
+/* Styles pour le conteneur de chargement */
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+/* Styles pour l'animation de rotation */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .text-left {
   text-align: left;
 }

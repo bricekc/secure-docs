@@ -4,6 +4,7 @@ import {
   CREATE_DOCUMENTS,
   CREATE_USER,
   DELETE_FILE_IN_FOLDER,
+  GET_CURRENT_USER,
   GET_DOCUMENT_CONTENT,
   GET_DOCUMENTS,
   LOGIN,
@@ -47,6 +48,27 @@ export const authService = {
           name: userData.name,
           password: userData.password,
         },
+      });
+      return data;
+    } catch (error: unknown) {
+      if (error instanceof ApolloError) {
+        const message =
+          error.message ||
+          error.graphQLErrors[0]?.message ||
+          "Erreur lors de l'inscription";
+        throw new Error(message);
+      } else if (error instanceof Error) {
+        throw new Error(error.message);
+      } else {
+        throw new Error("Erreur lors de l'inscription");
+      }
+    }
+  },
+
+  async getCurrentUser() {
+    try {
+      const { data } = await apolloClient.query({
+        query: GET_CURRENT_USER,
       });
       return data;
     } catch (error: unknown) {
