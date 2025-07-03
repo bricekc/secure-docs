@@ -12,6 +12,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { APP_FILTER } from '@nestjs/core';
 import { AllExceptionsFilter } from './log/log.filter';
 import { LogModule } from './log/log.module';
+import { GeminiModule } from './gemini/gemini.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { LogModule } from './log/log.module';
       },
     }),
     LogModule,
+    GeminiModule,
   ],
   providers: [
     PrismaService,

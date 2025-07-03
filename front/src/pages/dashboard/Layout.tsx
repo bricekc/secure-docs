@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import type React from "react";
+import { gql, useMutation } from "@apollo/client";
 
 import { Outlet, Link, useLocation } from "react-router-dom";
 import {
@@ -14,6 +15,12 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 
+const SEND_MESSAGE_MUTATION = gql`
+  mutation SendMessage($input: SendMessageInput!) {
+    sendMessage(input: $input)
+  }
+`;
+
 export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showChatbot, setShowChatbot] = useState(false);
@@ -26,9 +33,10 @@ export default function DashboardLayout() {
     },
   ]);
   const [chatInput, setChatInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const { user, logout } = useAuth();
   const location = useLocation();
+
+  const [sendMessage, { loading: mutationLoading }] = useMutation(SEND_MESSAGE_MUTATION);
 
   const navigation = [
     { name: "Mes Documents", href: "/dashboard", icon: Home },
@@ -39,7 +47,7 @@ export default function DashboardLayout() {
 
   const handleChatSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!chatInput.trim() || isLoading) return;
+    if (!chatInput.trim() || mutationLoading) return;
 
     const userMessage = chatInput.trim();
     setChatMessages((prev) => [
@@ -47,75 +55,18 @@ export default function DashboardLayout() {
       { type: "user", message: userMessage },
     ]);
     setChatInput("");
-    setIsLoading(true);
 
     try {
-      // Utilisation de l'API Google Gemini avec votre clé
-      const GEMINI_API_KEY = "AIzaSyCpQ3SFlP5tJHhqjZ6fR5nZ1HvFtyBvNAk";
-
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+      const { data } = await sendMessage({
+        variables: {
+          input: {
+            message: userMessage,
           },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  {
-                    text: `Tu es un assistant IA professionnel pour une plateforme de gestion documentaire appelée "Secure Docs". Tu aides les utilisateurs avec leurs questions sur la gestion de documents, la sécurité, l'organisation de fichiers, et toute question générale. Réponds en français de manière claire, utile et professionnelle. 
-
-Question de l'utilisateur: ${userMessage}`,
-                  },
-                ],
-              },
-            ],
-            generationConfig: {
-              temperature: 0.7,
-              topK: 40,
-              topP: 0.95,
-              maxOutputTokens: 1024,
-            },
-            safetySettings: [
-              {
-                category: "HARM_CATEGORY_HARASSMENT",
-                threshold: "BLOCK_MEDIUM_AND_ABOVE",
-              },
-              {
-                category: "HARM_CATEGORY_HATE_SPEECH",
-                threshold: "BLOCK_MEDIUM_AND_ABOVE",
-              },
-              {
-                category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-                threshold: "BLOCK_MEDIUM_AND_ABOVE",
-              },
-              {
-                category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-                threshold: "BLOCK_MEDIUM_AND_ABOVE",
-              },
-            ],
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Erreur API Gemini:", errorData);
-        throw new Error(
-          `Erreur API: ${response.status} - ${
-            errorData.error?.message || "Erreur inconnue"
-          }`
-        );
-      }
-
-      const data = await response.json();
-      console.log("Réponse Gemini:", data);
+        },
+      });
 
       const aiResponse =
-        data.candidates?.[0]?.content?.parts?.[0]?.text ||
-        "Désolé, je n'ai pas pu traiter votre demande. Pouvez-vous reformuler votre question ?";
+        data?.sendMessage || "Désolé, une erreur est survenue.";
 
       setChatMessages((prev) => [
         ...prev,
@@ -123,41 +74,14 @@ Question de l'utilisateur: ${userMessage}`,
       ]);
     } catch (error) {
       console.error("Erreur chatbot:", error);
-
-      // Réponse de fallback plus intelligente
-      let fallbackResponse = "";
-      const lowerMessage = userMessage.toLowerCase();
-
-      if (
-        lowerMessage.includes("bonjour") ||
-        lowerMessage.includes("salut") ||
-        lowerMessage.includes("hi") ||
-        lowerMessage.includes("hello")
-      ) {
-        fallbackResponse =
-          "Bonjour ! Je suis votre assistant pour Secure Docs. Je peux vous aider avec la gestion de vos documents, l'organisation de fichiers, ou répondre à vos questions. Comment puis-je vous assister ?";
-      } else if (
-        lowerMessage.includes("document") ||
-        lowerMessage.includes("fichier")
-      ) {
-        fallbackResponse =
-          "Je peux vous aider avec la gestion de vos documents ! Vous pouvez créer, organiser, partager et sécuriser vos fichiers sur cette plateforme. Avez-vous une question spécifique ?";
-      } else if (
-        lowerMessage.includes("aide") ||
-        lowerMessage.includes("help")
-      ) {
-        fallbackResponse =
-          "Je suis là pour vous aider ! Vous pouvez me poser des questions sur : la gestion de documents, l'organisation de fichiers, la sécurité, le partage, ou toute autre question. Que souhaitez-vous savoir ?";
-      } else {
-        fallbackResponse = `Je rencontre une difficulté technique temporaire avec l'API Gemini. Cependant, concernant "${userMessage}", je peux vous dire que notre plateforme Secure Docs vous permet de gérer vos documents en toute sécurité. Pouvez-vous reformuler votre question ou me dire comment je peux vous aider autrement ?`;
-      }
-
       setChatMessages((prev) => [
         ...prev,
-        { type: "bot", message: fallbackResponse },
+        {
+          type: "bot",
+          message:
+            "Je ne parviens pas à me connecter à l'assistant pour le moment.",
+        },
       ]);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -319,7 +243,7 @@ Question de l'utilisateur: ${userMessage}`,
                   <div className="message-content">{msg.message}</div>
                 </div>
               ))}
-              {isLoading && (
+              {mutationLoading && (
                 <div className="message bot">
                   <div className="message-content">
                     <div className="typing-indicator">
@@ -338,10 +262,10 @@ Question de l'utilisateur: ${userMessage}`,
                 onChange={(e) => setChatInput(e.target.value)}
                 placeholder="Posez votre question..."
                 className="chat-input"
-                disabled={isLoading}
+                disabled={mutationLoading}
               />
-              <button type="submit" className="chat-send" disabled={isLoading}>
-                {isLoading ? "..." : "Envoyer"}
+              <button type="submit" className="chat-send" disabled={mutationLoading}>
+                {mutationLoading ? "..." : "Envoyer"}
               </button>
             </form>
           </div>

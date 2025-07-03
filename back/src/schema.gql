@@ -50,6 +50,7 @@ type Mutation {
   deleteFileInFolder(input: DeleteFileInput!): Boolean!
   login(input: LoginInput!): AuthResponse!
   logs(input: GetLogsInput!): [Log!]!
+  sendMessage(input: SendMessageInput!): String!
   updateDocument(input: UpdateDocumentInput!): Boolean!
   updateDocumentContent(input: UpdateDocumentContentInput!): Boolean!
 }
@@ -68,6 +69,10 @@ type Query {
 enum Role {
   ADMIN
   USER
+}
+
+input SendMessageInput {
+  message: String!
 }
 
 """
