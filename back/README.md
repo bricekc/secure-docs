@@ -2,97 +2,171 @@
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+<h1 align="center">Secure Docs - Backend</h1>
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Ce dépôt contient le backend de l'application **Secure Docs**. C'est une application côté serveur robuste, évolutive et sécurisée, construite avec le framework [NestJS](https://nestjs.com/).
 
-## Project setup
+Le backend gère l'authentification des utilisateurs, la gestion des documents et le stockage sécurisé des fichiers. Il expose une API GraphQL destinée à être consommée par le client front-end.
+
+## Technologies Principales
+
+- **[NestJS](https://nestjs.com/):** Un framework Node.js progressif pour construire des applications côté serveur efficaces et évolutives.
+- **[GraphQL](https://graphql.org/):** Un langage de requête pour les API et un environnement d'exécution pour répondre à ces requêtes avec vos données existantes.
+- **[Prisma](https://www.prisma.io/):** Un ORM de nouvelle génération pour Node.js et TypeScript.
+- **[PostgreSQL](https://www.postgresql.org/):** Un système de base de données relationnel-objet open-source et puissant.
+- **[Azure Blob Storage](https://azure.microsoft.com/en-us/services/storage/blobs/):** Pour un stockage de documents cloud sécurisé et évolutif.
+- **[Redis](https://redis.io/):** Utilisé comme file d'attente pour le traitement des tâches en arrière-plan avec BullMQ.
+- **[Passport-JWT](https://www.passportjs.org/):** Pour gérer l'authentification à l'aide de JSON Web Tokens.
+
+## Architecture
+
+### Approche Code-First de GraphQL
+
+Ce projet utilise l'approche **code-first** pour GraphQL, une fonctionnalité puissante de NestJS. Au lieu d'écrire manuellement le schéma GraphQL (fichiers `.graphql`), nous utilisons des décorateurs et des classes TypeScript pour le générer automatiquement.
+
+**Comment ça marche :**
+
+1.  **Modèles & DTOs :** Nous définissons la structure de nos données à l'aide de classes TypeScript (par exemple, `UserDTO`, `DocumentDTO`).
+2.  **Décorateurs :** Nous utilisons des décorateurs comme `@ObjectType()`, `@Field()`, `@Query()` et `@Mutation()` directement dans nos résolveurs et modèles.
+3.  **Génération de Schéma :** NestJS lit ces décorateurs à la compilation et génère automatiquement le fichier `schema.gql`.
+
+**Avantages :**
+
+- **Source Unique de Vérité :** Votre code TypeScript est la seule source de vérité, éliminant les problèmes de synchronisation entre votre code et votre schéma.
+- **Sécurité des Types :** Il offre une forte sécurité des types entre vos résolveurs et votre schéma.
+- **Expérience de Développement :** Il simplifie le développement en gardant la logique associée (modèles, résolveurs) au même endroit.
+
+### Base de Données & Prisma
+
+Nous utilisons **Prisma** comme ORM pour interagir avec la base de données PostgreSQL. Le schéma de la base de données est défini dans `prisma/schema.prisma`. Prisma fournit :
+
+- Un constructeur de requêtes auto-généré et typé.
+- Un système de migration facile à utiliser (`prisma migrate`).
+- Une source unique de vérité pour les modèles de base de données.
+
+### Tâches d'Arrière-plan & Workers
+
+Pour les tâches longues ou gourmandes en ressources comme le traitement et le téléversement de fichiers sur Azure Blob Storage, nous utilisons un système de **worker** alimenté par **BullMQ** et **Redis**.
+
+1.  Lorsqu'un utilisateur téléverse un fichier, une nouvelle tâche est ajoutée à la file d'attente.
+2.  Un processus worker distinct (`main.worker.ts`) écoute les nouvelles tâches.
+3.  Le worker traite la tâche en arrière-plan, garantissant que l'application principale reste réactive.
+
+## Fonctionnalités
+
+- **Gestion des Utilisateurs :** Inscription et connexion des utilisateurs.
+- **Authentification :** Authentification sécurisée basée sur JWT et contrôle d'accès basé sur les rôles (Admin, Utilisateur).
+- **Gestion des Documents :** Opérations CRUD pour les documents.
+- **Téléversement Sécurisé de Fichiers :** Téléversements de fichiers asynchrones et sécurisés vers Azure Blob Storage.
+- **Journalisation en Temps Réel :** Journalisation en temps réel des activités via WebSockets.
+
+## Prérequis
+
+- [Node.js](https://nodejs.org/en/) (v18 ou supérieur)
+- [PostgreSQL](https://www.postgresql.org/download/)
+- [Redis](https://redis.io/docs/getting-started/installation/)
+- Un [Compte de Stockage Azure](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-create)
+
+## Démarrage
+
+### 1. Cloner le dépôt
 
 ```bash
-$ npm install
+git clone <url-du-depot>
+cd secure-docs/back
 ```
 
-## Compile and run the project
+### 2. Installer les dépendances
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
 ```
 
-## Run tests
+### 3. Configurer les variables d'environnement
+
+Créez un fichier `.env` en copiant le fichier d'exemple :
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+cp .env.exemple .env
 ```
 
-## Deployment
+Ensuite, mettez à jour le fichier `.env` avec votre configuration :
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+```
+DATABASE_URL="postgresql://UTILISATEUR:MOTDEPASSE@HOTE:PORT/BASEDEDONNEES?schema=public"
+JWT_SECRET="votre-cle-jwt-super-secrete"
+REDIS_URL="redis://localhost:6379"
+AZURE_BLOB_STORAGE="votre-chaine-de-connexion-azure-storage"
+```
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### 4. Lancer les migrations de la base de données
+
+Cette commande appliquera toutes les migrations en attente à votre base de données.
 
 ```bash
-$ npm install -g mau
-$ mau deploy
+npx prisma migrate dev
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Lancement de l'Application
 
-## Resources
+L'application se compose de deux processus principaux : le serveur API et le worker d'arrière-plan. Vous devez lancer les deux pour que l'application soit pleinement fonctionnelle.
 
-Check out a few resources that may come in handy when working with NestJS:
+```bash
+# Lancer le serveur API principal (en mode watch)
+npm run start:dev
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+# Dans un autre terminal, lancer le worker
+npm run start:worker
+```
 
-## Support
+L'API GraphQL sera disponible à l'adresse `http://localhost:3000/graphql`.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## Lancement des Tests
 
-## Stay in touch
+```bash
+# Tests unitaires
+npm run test
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+# Couverture des tests
+npm run test:cov
+```
 
-## License
+### Communication en Temps Réel avec les WebSockets
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+L'application utilise les WebSockets pour fournir une communication en temps réel entre le serveur et le client. Ceci est principalement utilisé pour :
+
+- **Journalisation en Temps Réel :** Le `LogGateway` diffuse les journaux en temps réel aux utilisateurs administrateurs connectés.
+- **Mises à Jour du Statut des Documents :** Le `DocumentGateway` notifie les utilisateurs de l'état de leurs téléversements et mises à jour de documents.
+
+Cela garantit une expérience utilisateur dynamique et interactive, car les clients reçoivent un retour immédiat sans avoir besoin d'interroger le serveur.
+
+### Conteneurisation avec Docker
+
+Pour simplifier le déploiement et garantir la cohérence entre les différents environnements, ce projet inclut le support de Docker.
+
+- **`Dockerfile` :** Ce fichier définit le conteneur pour l'application NestJS principale.
+- **`Dockerfile.worker` :** Ce fichier définit le conteneur pour le worker d'arrière-plan.
+
+Ces Dockerfiles vous permettent de construire et d'exécuter l'application et son worker en tant que conteneurs isolés, rendant le processus de déploiement plus prévisible et évolutif.
+
+#### Lancer avec Docker
+
+1.  **Construire les images Docker :**
+
+    ```bash
+    docker build -t secure-docs-backend -f Dockerfile .
+    docker build -t secure-docs-worker -f Dockerfile.worker .
+    ```
+
+2.  **Lancer les conteneurs :**
+
+    Assurez-vous que votre base de données PostgreSQL et votre instance Redis sont accessibles depuis les conteneurs (par exemple, en utilisant Docker Compose ou en configurant correctement les variables d'environnement).
+
+    ```bash
+    docker run -d --name secure-docs-backend -p 3000:3000 secure-docs-backend
+    docker run -d --name secure-docs-worker secure-docs-worker
+    ```
+
+    Vous pouvez vérifier les logs des conteneurs avec `docker logs secure-docs-backend` et `docker logs secure-docs-worker`.
