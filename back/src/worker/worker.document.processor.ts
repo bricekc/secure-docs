@@ -30,28 +30,6 @@ export class DocumentProcessor extends WorkerHost {
     }
   }
 
-  private async listFiles(id: number): Promise<any[]> {
-    const files = await this.prisma.document.findMany({
-      where: { userId: id },
-      include: {
-        user: {
-          select: {
-            name: true,
-            email: true,
-          },
-        },
-      },
-    });
-
-    return files.map((file) => {
-      file['url'] = this.azureBlobService.getFileSasUrl(
-        `${file.user.email}/${file.name}`,
-      );
-      file['types'] = file.name.split('.').pop();
-      return file;
-    });
-  }
-
   private async handleUploadFileToAzure(job: Job<UploadFileJob>) {
     const { fileBuffer, originalFilename, userId, userEmail } = job.data;
     const azureFilename = `${userEmail}/${originalFilename}`;
@@ -94,7 +72,7 @@ export class DocumentProcessor extends WorkerHost {
 
       const url = await this.azureBlobService.uploadFile(azureFilename, buffer);
 
-      await this.prisma.document.update({
+      const data = await this.prisma.document.update({
         where: { id },
         data: { status: 'updated' },
       });
@@ -102,8 +80,11 @@ export class DocumentProcessor extends WorkerHost {
       console.log(
         `File updated successfully in Azure: ${url}, by user: ${userId}`,
       );
-      const updatedFiles = await this.listFiles(userId);
-      this.documentGateway.sendDocumentUpdate(userId.toString(), updatedFiles);
+      data['url'] = this.azureBlobService.getFileSasUrl(
+        `${userEmail}/${originalFilename}`,
+      );
+      data['types'] = originalFilename.split('.').pop();
+      this.documentGateway.sendDocumentUpdate(userId.toString(), data);
       return { success: true, url };
     } catch (error) {
       console.error(`Failed to update file ${azureFilename}:`, error);
