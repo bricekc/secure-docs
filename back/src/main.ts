@@ -10,7 +10,7 @@ async function bootstrap() {
       maxFileSize: 10_000_000,
     }),
   );
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
 }
 bootstrap().catch((err) => {
   console.error('Failed to start main application:', err);
