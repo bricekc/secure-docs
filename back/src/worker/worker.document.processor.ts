@@ -71,7 +71,7 @@ export class DocumentProcessor extends WorkerHost {
       });
 
       console.log(`File uploaded successfully to Azure: ${url}`);
-      data['url'] = this.azureBlobService.getFileSasUrl(
+      data['url'] = await this.azureBlobService.getFileSasUrl(
         `${userEmail}/${originalFilename}`,
       );
       data['types'] = originalFilename.split('.').pop();
