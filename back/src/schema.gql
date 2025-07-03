@@ -51,6 +51,7 @@ type Mutation {
   login(input: LoginInput!): AuthResponse!
   logs(input: GetLogsInput!): [Log!]!
   updateDocument(input: UpdateDocumentInput!): Boolean!
+  updateDocumentContent(input: UpdateDocumentContentInput!): Boolean!
 }
 
 type Query {
@@ -72,6 +73,12 @@ enum Role {
 `Date` type as integer. Type represents date and time as number of milliseconds from start of UNIX epoch.
 """
 scalar Timestamp
+
+input UpdateDocumentContentInput {
+  content: String!
+  filename: String!
+  id: Int!
+}
 
 input UpdateDocumentInput {
   file: Upload!

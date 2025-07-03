@@ -4,8 +4,10 @@ import {
   CREATE_DOCUMENTS,
   CREATE_USER,
   DELETE_FILE_IN_FOLDER,
+  GET_DOCUMENT_CONTENT,
   GET_DOCUMENTS,
   LOGIN,
+  UPDATE_DOCUMENT,
 } from "./gql-requests";
 
 const API_BASE_URL = import.meta.env.VITE_BACK_URL;
@@ -153,6 +155,65 @@ export const documentService = {
     });
 
     return response.data.deleteFileInFolder;
+  },
+
+  async updateDocument(id: number, file: File) {
+    const formData = new FormData();
+    formData.append(
+      "operations",
+      JSON.stringify({
+        query: UPDATE_DOCUMENT.loc?.source.body,
+        variables: {
+          id: id,
+          file: null,
+        },
+      })
+    );
+    formData.append("map", JSON.stringify({ "0": ["variables.file"] }));
+    formData.append("0", file);
+
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(`${API_BASE_URL}/graphql`, {
+      method: "POST",
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response
+        .json()
+        .catch(() => ({ message: "Erreur réseau" }));
+      throw new Error(error.message || `Erreur ${response.status}`);
+    }
+
+    return response.json();
+  },
+
+  async getDocumentContent(id: number) {
+    try {
+      const { data } = await apolloClient.query({
+        query: GET_DOCUMENT_CONTENT,
+        variables: { id },
+      });
+      return data.getDocumentContent;
+    } catch (error: unknown) {
+      if (error instanceof ApolloError) {
+        const message =
+          error.message ||
+          error.graphQLErrors[0]?.message ||
+          "Erreur lors de la récupération du contenu du document";
+        throw new Error(message);
+      } else if (error instanceof Error) {
+        throw new Error(error.message);
+      } else {
+        throw new Error(
+          "Erreur lors de la récupération du contenu du document"
+        );
+      }
+    }
   },
 
   // 👈 CONNECTER À VOTRE ENDPOINT GET /documents/shared

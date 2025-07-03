@@ -51,3 +51,21 @@ export const DELETE_FILE_IN_FOLDER = gql`
     deleteFileInFolder(input: $input)
   }
 `;
+
+export const UPDATE_DOCUMENT = gql`
+  mutation updateDocument($id: Int!, $file: Upload!) {
+    updateDocument(input: { id: $id, file: $file })
+  }
+`;
+
+export const GET_DOCUMENT_CONTENT = gql`
+  query getDocumentContent($id: Float!) {
+    getDocumentContent(id: $id)
+  }
+`;
+
+export const UPDATE_DOCUMENT_CONTENT = gql`
+  mutation updateDocumentContent($id: Int!, $content: String!, $filename: String!) {
+    updateDocumentContent(input: { id: $id, content: $content, filename: $filename })
+  }
+`;

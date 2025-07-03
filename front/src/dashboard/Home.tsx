@@ -18,6 +18,7 @@ import { documentService } from "../services/api";
 import { io } from "socket.io-client";
 import toast from "react-hot-toast";
 import type { User } from "../gql/graphql";
+import TextFileEditor from "../components/TextFileEditor";
 
 interface Document {
   id: number;
@@ -64,7 +65,6 @@ export default function DashboardHome() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [name, setName] = useState("");
   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [showNewDocModal, setShowNewDocModal] = useState(false);
@@ -130,25 +130,32 @@ export default function DashboardHome() {
 
   const handleEditStart = (doc: Document) => {
     setEditingId(doc.id);
-    setName(doc.name);
   };
 
-  const handleEditSave = (id: number) => {
-    setDocuments((docs) =>
-      docs.map((doc) => (doc.id === id ? { ...doc, title: name } : doc))
-    );
-    setEditingId(null);
-    setName("");
+  const handleEditSave = async (id: number) => {
+    if (!selectedDoc || !newDoc.file) {
+      alert("Veuillez sélectionner un fichier pour la mise à jour.");
+      return;
+    }
 
-    // Mettre à jour le document sélectionné si c'est le même
-    if (selectedDoc && selectedDoc.id === id) {
-      setSelectedDoc({ ...selectedDoc, name });
+    try {
+      await documentService.updateDocument(id, newDoc.file);
+      const userDocuments = await documentService.getDocuments();
+      setDocuments(userDocuments.listFilesInFolder);
+      setEditingId(null);
+      setNewDoc({ title: "", file: null });
+      setSelectedDoc(null);
+      setShowModal(false);
+      alert("Document mis à jour avec succès !");
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour du document:", error);
+      alert("Erreur lors de la mise à jour du document.");
     }
   };
 
   const handleEditCancel = () => {
     setEditingId(null);
-    setName("");
+    
   };
 
   const handleDelete = async (id: number) => {
@@ -169,22 +176,6 @@ export default function DashboardHome() {
     // Ouvrir le modal pour TOUS les types de documents (y compris les URLs)
     setSelectedDoc(doc);
     setShowModal(true);
-  };
-
-  const handleFileRead = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const result = reader.result as string;
-        console.log("Fichier lu:", result.substring(0, 100) + "..."); // Debug
-        resolve(result);
-      };
-      reader.onerror = (error) => {
-        console.error("Erreur lecture fichier:", error);
-        reject(error);
-      };
-      reader.readAsDataURL(file);
-    });
   };
 
   const handleNewDocument = async () => {
@@ -420,18 +411,43 @@ export default function DashboardHome() {
             </div>
             <div className="modal-body-large">
               {editingId === selectedDoc.id ? (
-                <div className="edit-container">
-                  <div className="form-group">
-                    <label className="form-label">Titre</label>
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="form-input"
-                      autoFocus
-                    />
-                  </div>
+                <div className="form-group">
+                <label className="form-label">Fichier *</label>
+                <div className="file-upload-container">
+                  <input
+                    type="file"
+                    onChange={(e) => {
+                      const selectedFile = e.target.files?.[0] || null;
+                      if (selectedFile && selectedDoc && selectedFile.name !== selectedDoc.name) {
+                        alert("Le nom du fichier doit être le même que le document existant.");
+                        e.target.value = "";
+                        setNewDoc({ ...newDoc, file: null });
+                      } else {
+                        setNewDoc({
+                          ...newDoc,
+                          file: selectedFile,
+                        });
+                      }
+                    }}
+                    className="form-input"
+                    accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.mp4,.avi,.mov,.jpg,.jpeg,.png,.gif,.mp3,.wav,.ogg"
+                    required
+                  />
+                  <p
+                    style={{
+                      color: "#6B7280",
+                      fontSize: "0.875rem",
+                      marginTop: "0.5rem",
+                      marginBottom: "1rem",
+                      textAlign: "center",
+                      fontStyle: "italic",
+                    }}
+                  >
+                    Glissez-déposez votre fichier ici ou cliquez pour
+                    sélectionner
+                  </p>
                 </div>
+              </div>
               ) : (
                 <div className="document-viewer">
                   {/* Informations du document */}
@@ -459,6 +475,11 @@ export default function DashboardHome() {
                           onError={() => console.error("Erreur chargement PDF")}
                         />
                       </div>
+                    )}
+
+                  {selectedDoc.url &&
+                    selectedDoc.types.toLowerCase() === "txt" && (
+                      <TextFileEditor document={selectedDoc} />
                     )}
 
                   {selectedDoc.url &&

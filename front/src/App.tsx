@@ -8,6 +8,7 @@ import LoginPage from "./pages/Login";
 import DashboardLayout from "./dashboard/Layout";
 import DashboardHome from "./dashboard/Home";
 import { Toaster } from "react-hot-toast";
+import AdminPage from "./pages/AdminPage";
 
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import "./App.css";
@@ -29,6 +30,7 @@ function App() {
           }
         >
           <Route index element={<DashboardHome />} />
+        <Route path="admin" element={<AdminPage />} />
         </Route>
       </Routes>
     </Router>

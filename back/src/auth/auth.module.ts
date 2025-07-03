@@ -5,14 +5,20 @@ import { JwtStrategy } from './jwt.strategy';
 import { AuthService } from './auth.service';
 import { AuthResolver } from './auth.resolver';
 import { LogModule } from 'src/log/log.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { AdminGuard } from './admin.guard';
 
 @Module({
   imports: [
-    JwtModule.register({
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '1d' },
+    ConfigModule,
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: { expiresIn: '1d' },
+      }),
+      inject: [ConfigService],
     }),
     PrismaModule,
     LogModule,
