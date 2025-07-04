@@ -9,7 +9,9 @@ import { Server, Socket } from 'socket.io';
 @WebSocketGateway({
   cors: {
     origin: '*',
+    credentials: true,
   },
+  transports: ['websocket', 'polling'],
 })
 export class LogGateway implements OnGatewayConnection {
   @WebSocketServer()
