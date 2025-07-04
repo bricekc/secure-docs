@@ -2441,6 +2441,10 @@ a:focus-visible {
   justify-content: center;
 }
 
+.admin-tab-trigger-selected {
+  color: var(--primary);
+}
+
 .admin-tab-trigger::before {
   content: '';
   position: absolute;
