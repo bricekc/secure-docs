@@ -183,12 +183,16 @@ export default function DashboardHome() {
   const handleNewDocument = async () => {
     if (newDoc.file) {
       try {
-        await documentService.createDocument({ file: newDoc.file });
+        const a = await documentService.createDocument({ file: newDoc.file });
+        console.log(a)
+        if (a?.errors) {
+          toast.error(a.errors[0].message)
+
+        }
         const userDocuments = await documentService.getDocuments();
         setDocuments(userDocuments.listFilesInFolder);
-      } catch (error) {
-        console.error("Erreur lors de la création du document:", error);
-        alert("Erreur lors de la création du document");
+      } catch {
+        toast.error("Error lors de la création du document");
         return;
       }
     }
